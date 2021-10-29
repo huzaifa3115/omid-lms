@@ -44,8 +44,8 @@
             <div class="col-md-3 col-xs-12 tab-con">
                 <div class="row">
                     <a href="/">
-                        <img src="{{ get_option('site_logo') }}" alt="{{ get_option('site_title') }}" class="logo-icon"/>
-                        <img src="{{ get_option('site_logo_type') }}" alt="{{ get_option('site_title') }}" class="logo-type"/>
+                        <img src="{{ get_option('site_logo') }}" alt="{{ get_option('site_title') }}" class="logo-icon custom-logo" style="width:30%"/>
+                        <!-- <img src="{{ get_option('site_logo_type') }}" alt="{{ get_option('site_title') }}" class="logo-type"/> -->
                     </a>
                 </div>
             </div>
@@ -69,16 +69,16 @@
                             <span class="header-title-caption">{{ $user['name'] }}</span>
                             <span class="headericon mdi mdi-chevron-down"></span>
                             <label class="alert">
-                                @if(isset($alert['all']) && $alert['all']>0)
+                                <!-- @if(isset($alert['all']) && $alert['all']>0)
                                     <span class="noti-holder">{{ $alert['all'] }}</span>
                                 @endif
-                                <span class="noti-icon headericon mdi mdi-bell-alert" onclick="window.location.href='/user/ticket/notification';"></span>
+                                <span class="noti-icon headericon mdi mdi-bell-alert" onclick="window.location.href='/user/ticket/notification';"></span> -->
                             </label>
                             <label onclick="event.stopPropagation();" class="alert alert-f">
-                                @if(isset($alert['ticket']) && $alert['ticket']>0)
+                                <!-- @if(isset($alert['ticket']) && $alert['ticket']>0)
                                     <span>{{ $alert['ticket'] }}</span>
                                 @endif
-                                <i class="headericon mdi mdi-email"></i>
+                                <i class="headericon mdi mdi-email"></i> -->
                             </label>
                             <div class="animated user-overlap sbox3">
                                 <div class="overlap-profile-viewer">
@@ -128,7 +128,7 @@
             <div class="menu-header">
 
                 <div class="col-md-1 text-center tab-con">
-                    <a href="/"><img src="{{ get_option('site_logo') }}" class="menu-logo"/></a>
+                    <a href="/"><img src="{{ get_option('site_logo') }}" class="menu-logo" style="width:100%"/></a>
                 </div>
                 <div class="col-md-10 col-xs-12 tab-con">
                     <ul id="accordion" class="cat-filters-li accordion accordion-s">
@@ -212,5 +212,3 @@
         </nav>
     </div>
 </div>
-
-

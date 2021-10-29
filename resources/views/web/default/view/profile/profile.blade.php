@@ -12,14 +12,14 @@
         <div class="col-md-9 col-xs-12 bottom-section">
             <span>
                 <label class="profile-name">{{ $profile->name }}</label>
-            @if($follow == 0)
+            <!-- @if($follow == 0)
                     <a class="btn btn-red btn-hover-animate" href="/follow/{{ $profile->id }}"><span class="homeicon mdi mdi-plus"></span>&nbsp;&nbsp;{{ trans('main.follow') }}</a>
                 @else
                     <a class="btn btn-red btn-hover-animate" href="/unfollow/{{ $profile->id }}"><span class="homeicon mdi mdi-close"></span>&nbsp;&nbsp;{{ trans('main.unfollow') }}</a>
-                @endif
-                <label class="buttons"><span class="homeicon mdi mdi-account-heart"></span><p>{{ $follow_count }}&nbsp;{{ trans('main.followers') }}</p></label>
-                <label class="buttons"><span class="homeicon mdi mdi-library-video"></span><p>{!! count($videos) !!} {{ trans('main.courses') }}</p></label>
-                <label class="buttons"><span class="homeicon mdi mdi-clock"></span><p class="duration-f">{{ $duration }}&nbsp;{{ trans('main.minutes_stat') }}</p></label>
+                @endif -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-account-heart"></span><p>{{ $follow_count }}&nbsp;{{ trans('main.followers') }}</p></label> -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-library-video"></span><p>{!! count($videos) !!} {{ trans('main.courses') }}</p></label> -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-clock"></span><p class="duration-f">{{ $duration }}&nbsp;{{ trans('main.minutes_stat') }}</p></label> -->
         </div>
     </div>
     <div class="container-fluid profile-middle-background">
@@ -29,7 +29,7 @@
                 <div class="rate-section raty" score="{!! profileRate($profile->id) ?? 0 !!}"></div>
             </div>
             <div class="location-section col-md-10 col-xs-12">
-                <div class="profile_name_item"><b>{{ $profile->name }}</b></div>
+                <div class="profile_name_item"><b>{{ $profile->name }}  <p>{!! count($videos) !!} {{ trans('main.courses') }}</p></b></div>
                 <div class="profile_register_date_item"><b>{{ trans('main.registration_date') }}: {{ date('d F Y',$profile->created_at) }}</b></div>
             </div>
         </div>
@@ -52,38 +52,38 @@
                         </a>
                     </div>
                     <div class="h-10 visible-xs"></div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-channels" class="item-box sbox3">
                             <span class="micon mdi mdi-bullhorn"></span>
                             <span>{{ trans('main.channels') }}</span>
                         </a>
-                    </div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    </div> -->
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-medals" class="item-box sbox3">
                             <span class="micon mdi mdi-medal"></span>
                             <span>{{ trans('main.badges') }}</span>
                         </a>
-                    </div>
+                    </div> -->
                     <div class="h-10 visible-xs"></div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-record" class="item-box sbox3">
                             <span class="micon mdi mdi-video"></span>
                             <span>{{ trans('main.future_courses') }}</span>
                         </a>
-                    </div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    </div> -->
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-article" class="item-box sbox3">
                             <span class="micon mdi mdi-notebook"></span>
                             <span>{{ trans('main.articles') }}</span>
                         </a>
-                    </div>
-                    <div class="h-10 visible-xs"></div>
+                    </div> -->
+                    <!-- <div class="h-10 visible-xs"></div>
                     <div class="col-md-1 col-sm-6 col-xs-12 tab-con">
                         <a href="javascript:void(0)" tab-id="t-request" class="item-box sbox3">
                             <span class="micon mdi mdi-camera-enhance"></span>
                             <span>{{ trans('main.request_course') }}</span>
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -158,7 +158,7 @@
                     <div class="body body-target-s">
                         <div class="row">
                             @foreach($videos as $vid)
-                                <?php $meta = arrayToList($vid->metas, 'option', 'value'); ?>
+                                <?php $meta = arrayToList($vid->metas, 'option', 'value');?>
                                 <div class="col-md-3 col-sm-6 col-xs-12 tab-con">
                                     <a href="/product/{{ $vid->id }}" title="{{ $vid->title }}" class="content-box">
                                         <img alt="{{ $vid->title ?? '' }}" src="{{ !empty($meta['thumbnail']) ? $meta['thumbnail'] : '' }}"/>
@@ -214,7 +214,7 @@
                                 <div class="product-card">
                                     <h2>{{ $rate['description'] }}</h2>
                                     <h4>
-                                        <?php $middle = explode(',', $rate['value']); ?>
+                                        <?php $middle = explode(',', $rate['value']);?>
                                         {{ trans('main.From') }}
                                         {{ $middle[0] }}
                                         {{ trans('main.to') }}
@@ -325,7 +325,7 @@
                     <div class="body bodt-target-s">
                         <div class="row">
                             @foreach($record as $vid)
-                                <?php $meta = arrayToList($vid->metas, 'option', 'value'); ?>
+                                <?php $meta = arrayToList($vid->metas, 'option', 'value');?>
                                 <div class="col-md-3 col-sm-6 col-xs-12 tab-con">
                                     <a href="/product/{{ $vid->id }}" title="{{ $vid->title }}" class="content-box">
                                         <img alt="{{ $vid->title ?? '' }}" src="{{ $vid->image }}"/>

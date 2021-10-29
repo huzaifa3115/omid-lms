@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 Route::group(['namespace' => 'Auth'], function () {
     // Web Auth Routes
     Route::get('/login', 'LoginController@showLoginForm');
@@ -67,7 +66,7 @@ Route::group(['middleware' => 'notification'], function () {
         ## Product
         Route::get('{id}/{title?}', 'WebController@product');
         Route::get('part/{id}/{pid}', 'WebController@productPart');
-        Route::get('captivate/{id}/{pid}','WebController@productCaptivate');
+        Route::get('captivate/{id}/{pid}', 'WebController@productCaptivate');
     });
 
     ## Article Section
@@ -107,7 +106,6 @@ Route::group(['middleware' => 'notification'], function () {
 
     Route::any('payment/wallet/status', 'WebController@walletStatus');
 
-
     ### Bank Section ###
     Route::group(['prefix' => 'bank'], function () {
 
@@ -135,41 +133,41 @@ Route::group(['middleware' => 'notification'], function () {
             Route::any('status/{id}', 'WebController@razorpayStatus');
         });
 
-        Route::group(['prefix' => 'wecashup'], function (){
-            Route::any('callback','WebController@wecashupCallback');
-            Route::any('hook','WebController@wecashupHook');
+        Route::group(['prefix' => 'wecashup'], function () {
+            Route::any('callback', 'WebController@wecashupCallback');
+            Route::any('hook', 'WebController@wecashupHook');
         });
 
-        Route::group(['prefix' => 'cinetpay'], function (){
-            Route::any('notify','WebController@cinetpaynotify');
-            Route::any('return','WebController@cinetpayReturn');
-            Route::any('cancel','WebController@cinetpayCancel');
+        Route::group(['prefix' => 'cinetpay'], function () {
+            Route::any('notify', 'WebController@cinetpaynotify');
+            Route::any('return', 'WebController@cinetpayReturn');
+            Route::any('cancel', 'WebController@cinetpayCancel');
         });
 
-        Route::group(['prefix' => 'stripe'], function (){
-            Route::any('successfully','WebController@stripeSuccess');
-            Route::any('cancel','WebController@stripeCancel');
+        Route::group(['prefix' => 'stripe'], function () {
+            Route::any('successfully', 'WebController@stripeSuccess');
+            Route::any('cancel', 'WebController@stripeCancel');
         });
     });
 
-    Route::get('lng/{lng}',function ($lng){
-        \Illuminate\Support\Facades\Cookie::queue('lng',$lng,time()+1000000000000);
+    Route::get('lng/{lng}', function ($lng) {
+        \Illuminate\Support\Facades\Cookie::queue('lng', $lng, time() + 1000000000000);
         return back();
     });
 
 });
 
-Route::get('update',function(){
-   $users = \App\User::all();
-   foreach ($users as $user){
-       try {
-           $password = decrypt($user->password);
-           \App\User::find($user->id)->update(['password'=>\Illuminate\Support\Facades\Hash::make($password)]);
-       } catch(\RuntimeException $e) {
-       }
-   }
+Route::get('update', function () {
+    $users = \App\User::all();
+    foreach ($users as $user) {
+        try {
+            $password = decrypt($user->password);
+            \App\User::find($user->id)->update(['password' => \Illuminate\Support\Facades\Hash::make($password)]);
+        } catch (\RuntimeException $e) {
+        }
+    }
 });
 
-Route::get('get',function (\Illuminate\Http\Request $request){
+Route::get('get', function (\Illuminate\Http\Request $request) {
     dd($request->all());
 });

@@ -12,14 +12,14 @@
         <div class="col-md-9 col-xs-12 bottom-section">
             <span>
                 <label class="profile-name"><?php echo e($profile->name); ?></label>
-            <?php if($follow == 0): ?>
+            <!-- <?php if($follow == 0): ?>
                     <a class="btn btn-red btn-hover-animate" href="/follow/<?php echo e($profile->id); ?>"><span class="homeicon mdi mdi-plus"></span>&nbsp;&nbsp;<?php echo e(trans('main.follow')); ?></a>
                 <?php else: ?>
                     <a class="btn btn-red btn-hover-animate" href="/unfollow/<?php echo e($profile->id); ?>"><span class="homeicon mdi mdi-close"></span>&nbsp;&nbsp;<?php echo e(trans('main.unfollow')); ?></a>
-                <?php endif; ?>
-                <label class="buttons"><span class="homeicon mdi mdi-account-heart"></span><p><?php echo e($follow_count); ?>&nbsp;<?php echo e(trans('main.followers')); ?></p></label>
-                <label class="buttons"><span class="homeicon mdi mdi-library-video"></span><p><?php echo count($videos); ?> <?php echo e(trans('main.courses')); ?></p></label>
-                <label class="buttons"><span class="homeicon mdi mdi-clock"></span><p class="duration-f"><?php echo e($duration); ?>&nbsp;<?php echo e(trans('main.minutes_stat')); ?></p></label>
+                <?php endif; ?> -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-account-heart"></span><p><?php echo e($follow_count); ?>&nbsp;<?php echo e(trans('main.followers')); ?></p></label> -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-library-video"></span><p><?php echo count($videos); ?> <?php echo e(trans('main.courses')); ?></p></label> -->
+                <!-- <label class="buttons"><span class="homeicon mdi mdi-clock"></span><p class="duration-f"><?php echo e($duration); ?>&nbsp;<?php echo e(trans('main.minutes_stat')); ?></p></label> -->
         </div>
     </div>
     <div class="container-fluid profile-middle-background">
@@ -29,7 +29,7 @@
                 <div class="rate-section raty" score="<?php echo profileRate($profile->id) ?? 0; ?>"></div>
             </div>
             <div class="location-section col-md-10 col-xs-12">
-                <div class="profile_name_item"><b><?php echo e($profile->name); ?></b></div>
+                <div class="profile_name_item"><b><?php echo e($profile->name); ?>  <p><?php echo count($videos); ?> <?php echo e(trans('main.courses')); ?></p></b></div>
                 <div class="profile_register_date_item"><b><?php echo e(trans('main.registration_date')); ?>: <?php echo e(date('d F Y',$profile->created_at)); ?></b></div>
             </div>
         </div>
@@ -52,38 +52,38 @@
                         </a>
                     </div>
                     <div class="h-10 visible-xs"></div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-channels" class="item-box sbox3">
                             <span class="micon mdi mdi-bullhorn"></span>
                             <span><?php echo e(trans('main.channels')); ?></span>
                         </a>
-                    </div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    </div> -->
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-medals" class="item-box sbox3">
                             <span class="micon mdi mdi-medal"></span>
                             <span><?php echo e(trans('main.badges')); ?></span>
                         </a>
-                    </div>
+                    </div> -->
                     <div class="h-10 visible-xs"></div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-record" class="item-box sbox3">
                             <span class="micon mdi mdi-video"></span>
                             <span><?php echo e(trans('main.future_courses')); ?></span>
                         </a>
-                    </div>
-                    <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                    </div> -->
+                    <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                         <a href="javascript:void(0)" tab-id="t-article" class="item-box sbox3">
                             <span class="micon mdi mdi-notebook"></span>
                             <span><?php echo e(trans('main.articles')); ?></span>
                         </a>
-                    </div>
-                    <div class="h-10 visible-xs"></div>
+                    </div> -->
+                    <!-- <div class="h-10 visible-xs"></div>
                     <div class="col-md-1 col-sm-6 col-xs-12 tab-con">
                         <a href="javascript:void(0)" tab-id="t-request" class="item-box sbox3">
                             <span class="micon mdi mdi-camera-enhance"></span>
                             <span><?php echo e(trans('main.request_course')); ?></span>
                         </a>
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -159,7 +159,7 @@
                     <div class="body body-target-s">
                         <div class="row">
                             <?php $__currentLoopData = $videos; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vid): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <?php $meta = arrayToList($vid->metas, 'option', 'value'); ?>
+                                <?php $meta = arrayToList($vid->metas, 'option', 'value');?>
                                 <div class="col-md-3 col-sm-6 col-xs-12 tab-con">
                                     <a href="/product/<?php echo e($vid->id); ?>" title="<?php echo e($vid->title); ?>" class="content-box">
                                         <img alt="<?php echo e($vid->title ?? ''); ?>" src="<?php echo e(!empty($meta['thumbnail']) ? $meta['thumbnail'] : ''); ?>"/>
@@ -215,7 +215,7 @@
                                 <div class="product-card">
                                     <h2><?php echo e($rate['description']); ?></h2>
                                     <h4>
-                                        <?php $middle = explode(',', $rate['value']); ?>
+                                        <?php $middle = explode(',', $rate['value']);?>
                                         <?php echo e(trans('main.From')); ?>
 
                                         <?php echo e($middle[0]); ?>
@@ -337,7 +337,7 @@
                     <div class="body bodt-target-s">
                         <div class="row">
                             <?php $__currentLoopData = $record; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $vid): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                <?php $meta = arrayToList($vid->metas, 'option', 'value'); ?>
+                                <?php $meta = arrayToList($vid->metas, 'option', 'value');?>
                                 <div class="col-md-3 col-sm-6 col-xs-12 tab-con">
                                     <a href="/product/<?php echo e($vid->id); ?>" title="<?php echo e($vid->title); ?>" class="content-box">
                                         <img alt="<?php echo e($vid->title ?? ''); ?>" src="<?php echo e($vid->image); ?>"/>

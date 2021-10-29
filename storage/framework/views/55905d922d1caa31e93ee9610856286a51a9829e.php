@@ -45,8 +45,8 @@
             <div class="col-md-3 col-xs-12 tab-con">
                 <div class="row">
                     <a href="/">
-                        <img src="<?php echo e(get_option('site_logo')); ?>" alt="<?php echo e(get_option('site_title')); ?>" class="logo-icon"/>
-                        <img src="<?php echo e(get_option('site_logo_type')); ?>" alt="<?php echo e(get_option('site_title')); ?>" class="logo-type"/>
+                        <img src="<?php echo e(get_option('site_logo')); ?>" alt="<?php echo e(get_option('site_title')); ?>" class="logo-icon custom-logo" style="width:30%"/>
+                        <!-- <img src="<?php echo e(get_option('site_logo_type')); ?>" alt="<?php echo e(get_option('site_title')); ?>" class="logo-type"/> -->
                     </a>
                 </div>
             </div>
@@ -71,16 +71,16 @@
                             <span class="header-title-caption"><?php echo e($user['name']); ?></span>
                             <span class="headericon mdi mdi-chevron-down"></span>
                             <label class="alert">
-                                <?php if(isset($alert['all']) && $alert['all']>0): ?>
+                                <!-- <?php if(isset($alert['all']) && $alert['all']>0): ?>
                                     <span class="noti-holder"><?php echo e($alert['all']); ?></span>
                                 <?php endif; ?>
-                                <span class="noti-icon headericon mdi mdi-bell-alert" onclick="window.location.href='/user/ticket/notification';"></span>
+                                <span class="noti-icon headericon mdi mdi-bell-alert" onclick="window.location.href='/user/ticket/notification';"></span> -->
                             </label>
                             <label onclick="event.stopPropagation();" class="alert alert-f">
-                                <?php if(isset($alert['ticket']) && $alert['ticket']>0): ?>
+                                <!-- <?php if(isset($alert['ticket']) && $alert['ticket']>0): ?>
                                     <span><?php echo e($alert['ticket']); ?></span>
                                 <?php endif; ?>
-                                <i class="headericon mdi mdi-email"></i>
+                                <i class="headericon mdi mdi-email"></i> -->
                             </label>
                             <div class="animated user-overlap sbox3">
                                 <div class="overlap-profile-viewer">
@@ -130,7 +130,7 @@
             <div class="menu-header">
 
                 <div class="col-md-1 text-center tab-con">
-                    <a href="/"><img src="<?php echo e(get_option('site_logo')); ?>" class="menu-logo"/></a>
+                    <a href="/"><img src="<?php echo e(get_option('site_logo')); ?>" class="menu-logo" style="width:100%"/></a>
                 </div>
                 <div class="col-md-10 col-xs-12 tab-con">
                     <ul id="accordion" class="cat-filters-li accordion accordion-s">
@@ -217,6 +217,4 @@
         </nav>
     </div>
 </div>
-
-
 <?php /**PATH E:\xampp-php-7-3\htdocs\omid-lms\resources\views/web/default/view/layout/header.blade.php ENDPATH**/ ?>

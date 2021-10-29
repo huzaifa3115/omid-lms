@@ -76,14 +76,14 @@ Route::group(['prefix' => 'user'], function () {
             });
 
             ## Live ##
-            Route::group(['prefix'=>'live'], function (){
-               Route::get('','UserController@videoLiveList');
-               Route::get('list','UserController@videoLiveList');
-               Route::post('new/store','UserController@videoLiveNewStore');
-               Route::post('edit/store/{id}','UserController@videoLiveEditStore');
-               Route::post('url/store/{id}','UserController@videoLiveUrlStore');
-               Route::get('edit/{id}','UserController@videoLiveEdit');
-               Route::get('users/{id}','UserController@videoLiveUsers');
+            Route::group(['prefix' => 'live'], function () {
+                Route::get('', 'UserController@videoLiveList');
+                Route::get('list', 'UserController@videoLiveList');
+                Route::post('new/store', 'UserController@videoLiveNewStore');
+                Route::post('edit/store/{id}', 'UserController@videoLiveEditStore');
+                Route::post('url/store/{id}', 'UserController@videoLiveUrlStore');
+                Route::get('edit/{id}', 'UserController@videoLiveEdit');
+                Route::get('users/{id}', 'UserController@videoLiveUsers');
             });
 
         });
@@ -147,11 +147,11 @@ Route::group(['prefix' => 'user'], function () {
             Route::get('part/json/{id}', 'UserController@contentPartsJson');
 
             ## Meeting ##
-            Route::group(['prefix'=>'meeting'], function (){
-               Route::any('delete/{id}','UserController@contentMeetingDelete');
-               Route::post('new/store/{id}','UserController@contentMeetingNewStore');
-               Route::any('action','UserController@contentMeetingAction');
-               Route::any('{id}','UserController@contentMeetingItem');
+            Route::group(['prefix' => 'meeting'], function () {
+                Route::any('delete/{id}', 'UserController@contentMeetingDelete');
+                Route::post('new/store/{id}', 'UserController@contentMeetingNewStore');
+                Route::any('action', 'UserController@contentMeetingAction');
+                Route::any('{id}', 'UserController@contentMeetingItem');
             });
         });
 
@@ -196,10 +196,12 @@ Route::group(['prefix' => 'user'], function () {
         ## Update Notification Ajax
         Route::get('ajax/notification/{mode}/{notification_id}', function ($mode, $notification_id) {
             global $user;
-            if (setNotification($user['id'], $mode, $notification_id) == 1)
+            if (setNotification($user['id'], $mode, $notification_id) == 1) {
                 return 1;
-            else
+            } else {
                 return 0;
+            }
+
         });
 
         Route::get('become', 'UserController@becomeVendor');
@@ -281,16 +283,14 @@ Route::group(['middleware' => 'notification'], function () {
             Route::get('pay/{id}/{type}', 'UserController@paystackPay');
         });
 
-        Route::get('razorpay/pay/{id}/{type}','UserController@razorpayPay');
+        Route::get('razorpay/pay/{id}/{type}', 'UserController@razorpayPay');
 
-        Route::get('wecashup/pay/{id}/{type}','UserController@wecashupPay');
+        Route::get('wecashup/pay/{id}/{type}', 'UserController@wecashupPay');
 
-        Route::get('cinetpay/pay/{id}/{type}','UserController@cinetpayPay');
+        Route::get('cinetpay/pay/{id}/{type}', 'UserController@cinetpayPay');
 
         Route::get('/credit/pay/{id}/{mode}', 'UserController@creditPay');
 
-        Route::get('/stripe/pay/{id}/{type}','UserController@stripePay');
+        Route::get('/stripe/pay/{id}/{type}', 'UserController@stripePay');
     });
 });
-
-

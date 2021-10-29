@@ -568,7 +568,7 @@
                         @endif
                         <div class="course_details">
                             <div class="product-user-box">
-                                <?php $userMetas = arrayToList($product->user->usermetas, 'option', 'value'); ?>
+                                <?php $userMetas = arrayToList($product->user->usermetas, 'option', 'value');?>
                                 <img alt="{{ $product->user->username ?? '' }}" class="img-box" src="{{ !empty($userMetas['avatar']) ? $userMetas['avatar'] : get_option('default_user_avatar','') }}" class="img-responsive"/>
                                 <h3>
                                     <a href="/profile/{{ $product->user->id }}"><span>{{ $product->user->name }}</span></a>
@@ -590,7 +590,7 @@
                             <div class="h-25"></div>
                         </div>
                     </div>
-                    <div class="row">
+                    <!-- <div class="row">
                         @if(isset($ads))
                             @foreach($ads as $ad)
                                 @if($ad->position == 'product-page')
@@ -598,7 +598,7 @@
                                 @endif
                             @endforeach
                         @endif
-                    </div>
+                    </div> -->
                 </div>
                 <div class="col-md-8 col-xs-12 product-part-container">
                     <div class="user-tabs">
@@ -695,7 +695,7 @@
                             </div>
                             <div class="tab-pane fade in tab-body" id="tab3">
                                 @foreach($precourse as $pc)
-                                    <?php $pmeta = arrayToList($pc->metas, 'option', 'value'); ?>
+                                    <?php $pmeta = arrayToList($pc->metas, 'option', 'value');?>
                                     <div class="col-md-4 col-xs-12 tab-con">
                                         <a href="/product/{{ $pc->id }}" title="{{ $pc->title }}" class="content-box content-box-r">
                                             <img alt="{!! $pc->title ?? '' !!}" src="{{ $pmeta['thumbnail'] }}"/>
@@ -855,7 +855,7 @@
                         <div class="tab-content">
                             <div class="active tab-pane fade in tab-body" id="vtab1">
                                 @foreach($related as $rel)
-                                    <?php $rmeta = arrayToList($rel->metas, 'option', 'value'); ?>
+                                    <?php $rmeta = arrayToList($rel->metas, 'option', 'value');?>
                                     <div class="col-md-4 col-xs-12 tab-con">
                                         <a href="/product/{{ $rel->id }}" title="{{ $rel->title }}" class="content-box content-box-r">
                                             <img alt="{{ $rel->title ?? '' }}" src="{{ $rmeta['thumbnail'] }}"/>
@@ -871,7 +871,7 @@
                             <div class="tab-pane fade tab-body" id="vtab2">
                                 @foreach($product->user->contents as $puc)
                                     @if($puc->id != $product->id)
-                                        <?php $umeta = arrayToList($puc->metas, 'option', 'value'); ?>
+                                        <?php $umeta = arrayToList($puc->metas, 'option', 'value');?>
                                         <div class="col-md-4 col-xs-12 tab-con">
                                             <a href="/product/{{ $puc->id }}" title="{{ $puc->title }}" class="content-box content-box-r">
                                                 <img alt="{{ $puc->title ?? '' }}" src="{{ $umeta['thumbnail'] }}"/>
@@ -925,7 +925,7 @@
                                 <ul class="comment-box support-list1">
                                     @foreach($product->comments as $comment)
                                         @if($comment->parent == 0)
-                                            <?php $userMeta = arrayToList($comment->user->usermetas, 'option', 'value'); ?>
+                                            <?php $userMeta = arrayToList($comment->user->usermetas, 'option', 'value');?>
                                             <li class="user-metas">
                                                 <img alt="{{ $comment->user->username ?? '' }}" src="{{ $userMeta['avatar'] ?? '/assets/default/images/user.png' }}" />
                                                 <a href="/profile/{{ $comment->user_id }}">{{ $comment->name }} @if($comment->user->buys_count > 0) <b class="green-s">({{ trans('main.student') }})</b> @elseif($comment->user->contents_count > 0) <b class="blue-s">({{ trans('main.vendor') }})</b> @else  <b class="gray-s">({{ trans('main.user') }})</b> @endif</a>
@@ -936,7 +936,7 @@
                                             @if(count($comment->childs) > 0)
                                                 <ul class="col-md-11 col-md-offset-1 answer-comment">
                                                     @foreach($comment->childs as $child)
-                                                        <?php $cuserMeta = arrayToList($child->user->usermetas, 'option', 'value'); ?>
+                                                        <?php $cuserMeta = arrayToList($child->user->usermetas, 'option', 'value');?>
                                                         <li>
                                                             <img alt="{{ $child->user->username ?? '' }}" src="{{ !empty($cuserMeta['avatar']) ? $cuserMeta['avatar'] : '/assets/default/images/user.png' }}"/>
                                                             <a href="/profile/{{ $child->user_id }}">{{ $child->name }} @if($child->user->buys_count > 0) <b class="green-s">({{ trans('main.customer') }})</b> @elseif($child->user->contents_count > 0) <b class="blue-s">({{ trans('main.vendor') }})</b> @else <b class="gray-s">({{ trans('main.user') }})</b> @endif</a>
@@ -986,7 +986,7 @@
                                         @foreach($product->supports as $support)
                                             @if(isset($user) and $support->sender_id == $user['id'])
                                                 @if($support->supporter_id != $support->user_id)
-                                                    <?php $senderMeta = arrayToList($support->sender->usermetas, 'option', 'value'); ?>
+                                                    <?php $senderMeta = arrayToList($support->sender->usermetas, 'option', 'value');?>
                                                     <li class="user-metas">
                                                         <img src="{{ !empty($senderMeta['avatar']) ? $senderMeta['avatar'] : '/assets/default/images/user.png' }}" alt="{{ $support->user->username ?? '' }}"/>
                                                         <a href="/profile/{{ $support->user_id }}">{{ $support->name }}</a>
@@ -996,7 +996,7 @@
                                                         <span>{!! $support->comment !!}</span>
                                                     </li>
                                                 @else
-                                                    <?php $senderMeta = arrayToList($support->supporter->usermetas, 'option', 'value'); ?>
+                                                    <?php $senderMeta = arrayToList($support->supporter->usermetas, 'option', 'value');?>
                                                     <li class="user-metas">
                                                         <img src="{{ !empty($senderMeta['avatar']) ? $senderMeta['avatar'] : '/assets/default/images/user.png' }}" alt="{{ $support->user->username ?? '' }}"/>
                                                         <a href="/profile/{{ $support->user_id }}">{{ $support->name }}</a>

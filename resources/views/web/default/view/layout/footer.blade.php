@@ -18,7 +18,7 @@
         </div>
     </div>
 </div>
-<div class="container-fluid footer-blow">
+<!-- <div class="container-fluid footer-blow">
     <div class="col-md-3 col-xs-12 text-center">
         <span class="social-text">{{ trans('main.social_footer') }}</span>
         <ul>
@@ -41,7 +41,7 @@
              {{ trans('main.copyright2') }}
         </span>
     </div>
-</div>
+</div> -->
 <div class="modal fade" id="uploader-modal" role="dialog">
     <div class="modal-dialog modal-dialog-s">
         <div class="modal-content">
