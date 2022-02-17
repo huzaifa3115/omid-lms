@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 
-
 Route::group(['prefix' => 'admin'], function () {
 
     Route::get('login', 'Auth\admin\LoginController@showLoginForm');
@@ -15,8 +14,8 @@ Route::group(['prefix' => 'admin'], function () {
 
     Route::group(['middleware' => 'admin'], function () {
 
-        if(file_exists(realpath(__DIR__.'../../resources/views/web/plasma/route.php'))){
-            include(realpath(__DIR__.'../../resources/views/web/plasma/route.php'));
+        if (file_exists(realpath(__DIR__ . '../../resources/views/web/plasma/route.php'))) {
+            include (realpath(__DIR__ . '../../resources/views/web/plasma/route.php'));
         }
 
         Route::get('profile', 'AdminController@adminProfile');
@@ -64,7 +63,7 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('lists', 'AdminController@usersLists');
             Route::get('item/{id}', 'AdminController@userShow');
             Route::post('edit/{id}', 'AdminController@userEdit');
-            Route::get('password/{id}','AdminController@userPassword');
+            Route::get('password/{id}', 'AdminController@userPassword');
             Route::get('delete/{id}', 'AdminController@userDelete');
             Route::post('editprofile/{id}', 'AdminController@userEditProfile');
             Route::post('ratesection/{id}', 'AdminController@userRateSection');
@@ -95,7 +94,6 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('userlogin/{id}', 'AdminController@loginWithUser');
         });
 
-
         ####################
         ###Ticket Section###
         ####################
@@ -111,7 +109,6 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('user/{id}', 'AdminController@ticketUser');
             Route::post('user/store', 'AdminController@ticketUserStore');
             Route::get('user/delete/{id}', 'AdminController@ticketUserDelete');
-
 
             Route::get('reply/{id}', 'AdminController@ticketReply');
             Route::get('reply/{ticketid}/edit/{id}', 'AdminController@ticketReplyEdit');
@@ -298,7 +295,6 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('transaction', 'AdminController@transactionReports');
         });
 
-
         ###################
         ###Email Section###
         ###################
@@ -332,7 +328,6 @@ Route::group(['prefix' => 'admin'], function () {
             Route::get('content/publish/{id}', 'AdminController@discountContentPublish');
             Route::get('content/draft/{id}', 'AdminController@discountContentdraft');
         });
-
 
         #################
         ## Ads Section ##
@@ -428,12 +423,12 @@ Route::group(['prefix' => 'admin'], function () {
         #####################
         ### Live Section  ###
         #####################
-        Route::group(['prefix'=>'live'], function (){
-            Route::get('','AdminController@liveList');
-            Route::get('list','AdminController@liveList');
-            Route::get('details/{id}','AdminController@liveDetails');
-            Route::get('delete/{id}','AdminController@liveDelete');
+        Route::group(['prefix' => 'live'], function () {
+            Route::get('', 'AdminController@liveList');
+            Route::get('list', 'AdminController@liveList');
+            Route::get('details/{id}', 'AdminController@liveDetails');
+            Route::get('delete/{id}', 'AdminController@liveDelete');
         });
-        
+
     });
 });

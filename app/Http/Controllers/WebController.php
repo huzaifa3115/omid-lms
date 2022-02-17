@@ -20,7 +20,6 @@ use App\Models\ContentRate;
 use App\Models\ContentSupport;
 use App\Models\ContentVip;
 use App\Models\Discount;
-use App\Models\DiscountContent;
 use App\Models\Favorite;
 use App\Models\Follower;
 use App\Models\Login;
@@ -59,8 +58,8 @@ class WebController extends Controller
     {
         $paypal_conf = \Config::get('paypal');
         $this->_api_context = new ApiContext(new OAuthTokenCredential(
-                $paypal_conf['client_id'],
-                $paypal_conf['secret'])
+            $paypal_conf['client_id'],
+            $paypal_conf['secret'])
         );
         $this->_api_context->setConfig($paypal_conf['settings']);
     }
@@ -73,7 +72,7 @@ class WebController extends Controller
             'new_content' => $this->getContents('new', 'id', 'DESC'),
             'sell_content' => $this->getContents('sellCount', 'sells_count', 'DESC', 'sells'),
             'popular_content' => $this->getContents('popular', 'view', 'DESC'),
-            'live_content'  => $this->getLiveContents(),
+            'live_content' => $this->getLiveContents(),
             'blog_post' => $this->getBlogPosts(),
             'article_post' => $this->getArticlePosts(),
             'user_rate' => $this->getUsersWithRates(),
@@ -82,16 +81,17 @@ class WebController extends Controller
             'vip_content' => $this->getContentVip(),
             'slider_container' => $this->getSliderContainer(),
             'channels' => $this->getChannels(),
-            'user' => $user
+            'user' => $user,
         ];
 
         return view(getTemplate() . '.view.main', $data);
     }
 
-    private function getLiveContents(){
-        $contents = Content::where('mode', 'publish')->orderBy('id','DESC')->limit(10)
-            ->with('metas','user')
-            ->where('type','LIKE','%webinar%');
+    private function getLiveContents()
+    {
+        $contents = Content::where('mode', 'publish')->orderBy('id', 'DESC')->limit(10)
+            ->with('metas', 'user')
+            ->where('type', 'LIKE', '%webinar%');
 
         return $contents->get();
     }
@@ -197,18 +197,15 @@ class WebController extends Controller
             ->limit(4)
             ->get();
 
-
         $channels['view'] = $channelsQuery->orderBy('view', 'DESC')
             ->limit(4)
             ->get();
-
 
         $channels['popular'] = $channelsQuery->with(['user' => function ($query) {
             $query->withCount(['follow']);
         }])
             ->get()
             ->sortByDesc('user.followCount');
-
 
         return $channels;
     }
@@ -281,17 +278,19 @@ class WebController extends Controller
                 $content->where('type', 'course');
                 break;
             case 'webinar':
-                $content->where(function ($w){$w->where('type','webinar')->orwhere('type','course+webinar');});
+                $content->where(function ($w) {$w->where('type', 'webinar')->orwhere('type', 'course+webinar');});
                 break;
             default:
                 break;
         }
 
         ## Favorite ##
-        if(isset($request->order) && $request->order == 'favorite' && isset($user)){
+        if (isset($request->order) && $request->order == 'favorite' && isset($user)) {
             $favs = Favorite::where('user_id', $user->id)->pluck('content_id')->toArray();
-            if(is_array($favs))
-                $content->whereIn('id',$favs);
+            if (is_array($favs)) {
+                $content->whereIn('id', $favs);
+            }
+
         }
 
         $content = $content->get()->toArray();
@@ -304,7 +303,6 @@ class WebController extends Controller
         $mostSellContent = $content;
         usort($mostSellContent, array($this, 'orderSell'));
         $mostSellContent = array_slice($mostSellContent, 0, 3);
-
 
         ## Set For OrderBy
         switch ($order) {
@@ -345,10 +343,12 @@ class WebController extends Controller
 
         ## Set For Filters
         if ($filters != '') {
-            foreach ($content as $index=>$c){
-                $getFilters = ContentCategoryFilterTagRelation::where('content_id',$c['id'])->pluck('tag_id')->toArray();
-                if($getFilters)
+            foreach ($content as $index => $c) {
+                $getFilters = ContentCategoryFilterTagRelation::where('content_id', $c['id'])->pluck('tag_id')->toArray();
+                if ($getFilters) {
                     $content[$index]['metas']['filters'] = serialize($getFilters);
+                }
+
             }
             $content = $this->filters($content, $filters);
         }
@@ -362,53 +362,71 @@ class WebController extends Controller
             'course' => $course,
             'off' => $off,
             'filters' => $filters,
-            'mostSell' => $mostSellContent
+            'mostSell' => $mostSellContent,
         ];
 
-        if ($id != null)
+        if ($id != null) {
             return view(getTemplate() . '.view.category.category', $data);
-        else
+        } else {
             return view(getTemplate() . '.view.category.category_base', $data);
+        }
+
     }
 
     private static function orderPrice($a, $b)
     {
-        if ($a['metas']['price'] == $b['metas']['price'])
+        if ($a['metas']['price'] == $b['metas']['price']) {
             return 0;
-        if ($a['metas']['price'] < $b['metas']['price'])
+        }
+
+        if ($a['metas']['price'] < $b['metas']['price']) {
             return 1;
-        else
+        } else {
             return -1;
+        }
+
     }
 
     private static function orderCheap($a, $b)
     {
-        if ($a['metas']['price'] == $b['metas']['price'])
+        if ($a['metas']['price'] == $b['metas']['price']) {
             return 0;
-        if ($a['metas']['price'] > $b['metas']['price'])
+        }
+
+        if ($a['metas']['price'] > $b['metas']['price']) {
             return 1;
-        else
+        } else {
             return -1;
+        }
+
     }
 
     private static function orderSell($a, $b)
     {
-        if (count($a['sells']) == count($b['sells']))
+        if (count($a['sells']) == count($b['sells'])) {
             return 0;
-        if (count($a['sells']) < count($b['sells']))
+        }
+
+        if (count($a['sells']) < count($b['sells'])) {
             return 1;
-        else
+        } else {
             return -1;
+        }
+
     }
 
     private static function orderView($a, $b)
     {
-        if ($a['view'] == $b['view'])
+        if ($a['view'] == $b['view']) {
             return 0;
-        if ($a['view'] < $b['view'])
+        }
+
+        if ($a['view'] < $b['view']) {
             return 1;
-        else
+        } else {
             return -1;
+        }
+
     }
 
     private function pricing($array, $mode)
@@ -434,14 +452,18 @@ class WebController extends Controller
     {
         if ($mode == 'one') {
             foreach ($array as $index => $a) {
-                if (!empty($a['parts_count']) and $a['parts_count'] > 1)
+                if (!empty($a['parts_count']) and $a['parts_count'] > 1) {
                     unset($array[$index]);
+                }
+
             }
         }
         if ($mode == 'multi') {
             foreach ($array as $index => $a) {
-                if (!empty($a['parts_count']) and $a['parts_count'] == 1)
+                if (!empty($a['parts_count']) and $a['parts_count'] == 1) {
                     unset($array[$index]);
+                }
+
             }
         }
         return $array;
@@ -453,8 +475,10 @@ class WebController extends Controller
             if (!isset($a['metas']['price']) || $a['metas']['price'] == 0) {
                 unset($array[$index]);
             } else {
-                if ($a['discount'] == null)
+                if ($a['discount'] == null) {
                     unset($array[$index]);
+                }
+
             }
         }
 
@@ -467,8 +491,10 @@ class WebController extends Controller
             if (isset($a['metas']['filters'])) {
                 $filters_in = unserialize($a['metas']['filters']);
                 $c = array_intersect($filters_in, $filter);
-                if (count($c) == 0)
+                if (count($c) == 0) {
                     unset($array[$index]);
+                }
+
             } else {
                 unset($array[$index]);
             }
@@ -513,14 +539,12 @@ class WebController extends Controller
             ->with(['usermetas'])
             ->get();
 
-
         if (isset($type) and $type != 'user_name') {
             $content = $content->with(['metas', 'sells'])
                 ->withCount('parts');
         }
 
         $content = $content->get()->toArray();
-
 
         if (!isset($type) or (isset($type) and $type != 'user_name')) {
             foreach ($content as $index => $c) {
@@ -542,14 +566,14 @@ class WebController extends Controller
             'content_title' => trans('main.course_title'),
             'content_code' => trans('main.item_no'),
             'content_filter' => trans('main.filters'),
-            'user_name' => trans('main.username')
+            'user_name' => trans('main.username'),
         ];
 
         $data = [
             'contents' => $content,
             'users' => $users,
             'search_title' => $search_type_title,
-            'searchTypes' => $searchTypes
+            'searchTypes' => $searchTypes,
         ];
 
         return view(getTemplate() . '.view.search.search', $data);
@@ -576,7 +600,6 @@ class WebController extends Controller
             ->whereIn('id', $content_ids)
             ->get();
 
-
         $content = array_merge($content->toArray(), $content_filter->toArray());
         foreach ($content as $index => $con) {
             $content[$index]['code'] = "(VT-" . $con['id'] . ")";
@@ -593,7 +616,6 @@ class WebController extends Controller
 
         return array_unique($content_ids);
     }
-
 
     public function blog()
     {
@@ -727,7 +749,7 @@ class WebController extends Controller
             Follower::create([
                 'user_id' => $user->id,
                 'type' => 'chanel',
-                'follower' => $id
+                'follower' => $id,
             ]);
         }
 
@@ -765,7 +787,7 @@ class WebController extends Controller
 
         $product = $content->withCount(['comments' => function ($q) {
             $q->where('mode', 'publish');
-        }])->with(['meetings','discount', 'category' => function ($c) use ($content, $id) {
+        }])->with(['meetings', 'discount', 'category' => function ($c) use ($content, $id) {
             $c->with(['discount' => function ($dc) use ($id, $content) {
                 $dc->where('off_id', $content->category->id);
             }]);
@@ -797,7 +819,7 @@ class WebController extends Controller
             $q->with(['user.usermetas', 'supporter.usermetas', 'sender.usermetas'])->where('sender_id', $user->id)->where('mode', 'publish')->orderBy('id', 'DESC');
         }, 'quizzes' => function ($q) {
             $q->where('status', 'active');
-        }
+        },
         ])->find($id);
 
         $hasCertificate = false;
@@ -833,14 +855,16 @@ class WebController extends Controller
             }
         }
 
-        if (!$product)
+        if (!$product) {
             return abort(404);
+        }
 
         ## Update View
         $product->increment('view');
 
-        if ($product->price == 0 and $user)
+        if ($product->price == 0 and $user) {
             $buy = 1;
+        }
 
         $subscribe = false;
         if (isset($buy->tupe) and $buy->type == 'subscribe' and $buy->remain_time - time()) {
@@ -848,16 +872,17 @@ class WebController extends Controller
             $subscribe = true;
         }
 
-        if (!$product)
+        if (!$product) {
             return abort(404);
+        }
 
         $meta = arrayToList($product->metas, 'option', 'value');
         $parts = $product->parts->toArray();
-        if(isset($product->user))
+        if (isset($product->user)) {
             $rates = getRate($product->user->toArray());
-        else
+        } else {
             $rates = [];
-
+        }
 
         ## Get Related Content ##
         $relatedCat = $product->category_id;
@@ -868,7 +893,6 @@ class WebController extends Controller
             ->limit(3)
             ->inRandomOrder()
             ->get();
-
 
         ## Get PreCourse Content ##
         $preCourseIDs = [];
@@ -894,26 +918,26 @@ class WebController extends Controller
         }
 
         ## Live video ##
-        if($buy || (isset($user) && $user->id == $product->user_id)){
-            $live = MeetingDate::where('mode','active')->where('content_id', $id)->where('time_start','>',time())->orderBy('time_start')->limit(1)->get();
-        }else{
+        if ($buy || (isset($user) && $user->id == $product->user_id)) {
+            $live = MeetingDate::where('mode', 'active')->where('content_id', $id)->where('time_start', '>', time())->orderBy('time_start')->limit(1)->get();
+        } else {
             $live = false;
         }
 
         $data = [
-            'product'               => $product,
-            'hasCertificate'        => $hasCertificate,
-            'canDownloadCertificate'=> $canDownloadCertificate,
-            'meta'                  => $meta,
-            'parts'                 => $parts,
-            'rates'                 => $rates,
-            'buy'                   => $buy,
-            'related'               => $relatedContent,
-            'precourse'             => $preCousreContent,
-            'subscribe'             => $subscribe,
-            'Duration'              => $Duration,
-            'MB'                    => $MB,
-            'live'                  => $live
+            'product' => $product,
+            'hasCertificate' => $hasCertificate,
+            'canDownloadCertificate' => $canDownloadCertificate,
+            'meta' => $meta,
+            'parts' => $parts,
+            'rates' => $rates,
+            'buy' => $buy,
+            'related' => $relatedContent,
+            'precourse' => $preCousreContent,
+            'subscribe' => $subscribe,
+            'Duration' => $Duration,
+            'MB' => $MB,
+            'live' => $live,
         ];
         return view(getTemplate() . '.view.product.product', $data);
     }
@@ -967,26 +991,28 @@ class WebController extends Controller
             $where->where('mode', 'publish');
         })->find($id);
 
-
-        if (!$product)
+        if (!$product) {
             return abort(404);
+        }
 
         ## Update View
         $product->increment('view');
 
-        if ($product->price == 0 and $user)
+        if ($product->price == 0 and $user) {
             $buy = 1;
+        }
 
-        if($buy == 0)
+        if ($buy == 0) {
             return back();
+        }
 
-        if (!$product)
+        if (!$product) {
             return abort(404);
+        }
 
         $meta = arrayToList($product->metas, 'option', 'value');
         $parts = $product->parts->toArray();
         $rates = getRate($product->user->toArray());
-
 
         ## Get Related Content ##
         $relatedCat = $product->category_id;
@@ -1023,16 +1049,16 @@ class WebController extends Controller
         }
 
         $Part = ContentPart::find($pid);
-        if($Part->server == 'youtube' || $Part->server == 'vimeo'){
+        if ($Part->server == 'youtube' || $Part->server == 'vimeo') {
             $partVideo = $Part->upload_video;
-        }else{
+        } else {
             $partVideo = '/video/stream/' . $pid;
         }
 
         ## Live video ##
-        if($buy || (isset($user) && $user->id == $product->user_id)){
-            $live = MeetingDate::where('mode','active')->where('content_id', $id)->where('date',date('Y-m-d',time()))->get();
-        }else{
+        if ($buy || (isset($user) && $user->id == $product->user_id)) {
+            $live = MeetingDate::where('mode', 'active')->where('content_id', $id)->where('date', date('Y-m-d', time()))->get();
+        } else {
             $live = false;
         }
 
@@ -1047,14 +1073,15 @@ class WebController extends Controller
             'partVideo' => $partVideo,
             'Duration' => $Duration,
             'MB' => $MB,
-            'part'=>$Part,
-            'live'=> $live
+            'part' => $Part,
+            'live' => $live,
         ];
 
         return view(getTemplate() . '.view.product.product', $data);
     }
 
-    public function productCaptivate($id, $pid){
+    public function productCaptivate($id, $pid)
+    {
         session_start();
         error_reporting(0);
         $user = (auth()->check()) ? auth()->user() : null;
@@ -1103,25 +1130,27 @@ class WebController extends Controller
 
         $Part = ContentPart::find($pid);
 
-        if (!$product || !$Part)
+        if (!$product || !$Part) {
             return abort(404);
+        }
 
-        if($buy == 0 && $content->user_id != $user->id)
+        if ($buy == 0 && $content->user_id != $user->id) {
             return abort(404);
+        }
 
         ## Ok Se Show Captivate Content
-        $UserRoute = md5('prodevelopers'.$user->username);
-        $Route = getcwd().'/captivate/'.$UserRoute.'/content-'.$id.'/'.$pid.'/index.html';
-        $Extract = getcwd().'/captivate/'.$UserRoute.'/content-'.$id.'/'.$pid.'/';
-        $Redirect = '/captivate/'.$UserRoute.'/content-'.$id.'/'.$pid.'/index.html';
+        $UserRoute = md5('prodevelopers' . $user->username);
+        $Route = getcwd() . '/captivate/' . $UserRoute . '/content-' . $id . '/' . $pid . '/index.html';
+        $Extract = getcwd() . '/captivate/' . $UserRoute . '/content-' . $id . '/' . $pid . '/';
+        $Redirect = '/captivate/' . $UserRoute . '/content-' . $id . '/' . $pid . '/index.html';
         unset($_SESSION['user']);
         $_SESSION['user'] = $UserRoute;
-        if(file_exists($Route)){
+        if (file_exists($Route)) {
             return redirect($Redirect);
-        }else{
+        } else {
             $zip = new \ZipArchive;
-            $res = $zip->open(getcwd().$Part->upload_video);
-            if ($res === TRUE) {
+            $res = $zip->open(getcwd() . $Part->upload_video);
+            if ($res === true) {
                 $zip->extractTo($Extract);
                 $zip->close();
                 return redirect($Redirect);
@@ -1135,7 +1164,7 @@ class WebController extends Controller
         if ($user) {
             Favorite::create([
                 'content_id' => $id,
-                'user_id' => $user->id
+                'user_id' => $user->id,
             ]);
         }
         return back();
@@ -1153,8 +1182,10 @@ class WebController extends Controller
     public function productCommentStore($id, Request $request)
     {
         $user = (auth()->check()) ? auth()->user() : null;
-        if ($user == null)
+        if ($user == null) {
             return redirect()->back()->with('msg', trans('admin.login_to_comment'));
+        }
+
         ContentComment::create([
             'comment' => $request->comment,
             'user_id' => $user->id,
@@ -1162,7 +1193,7 @@ class WebController extends Controller
             'name' => $user->name,
             'content_id' => $id,
             'parent' => $request->parent,
-            'mode' => 'draft'
+            'mode' => 'draft',
         ]);
 
         return redirect()->back()->with('msg', trans('admin.comment_success'));
@@ -1187,7 +1218,7 @@ class WebController extends Controller
                 'content_id' => $id,
                 'mode' => 'draft',
                 'supporter_id' => $buy->user_id,
-                'sender_id' => $user->id
+                'sender_id' => $user->id,
             ]);
             return redirect()->back()->with('msg', trans('admin.support_success'));
         } else {
@@ -1243,12 +1274,12 @@ class WebController extends Controller
                 ContentRate::updateOrCreate(
                     [
                         'content_id' => $id,
-                        'user_id' => $user->id
+                        'user_id' => $user->id,
                     ],
                     [
                         'content_id' => $id,
                         'rate' => $rate,
-                        'user_id' => $user->id
+                        'user_id' => $user->id,
                     ]
                 );
                 return redirect()->back()->with('msg', trans('admin.rating_success'));
@@ -1259,12 +1290,12 @@ class WebController extends Controller
             ContentRate::updateOrCreate(
                 [
                     'content_id' => $id,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ],
                 [
                     'content_id' => $id,
                     'rate' => $rate,
-                    'user_id' => $user->id
+                    'user_id' => $user->id,
                 ]
             );
             return redirect()->back()->with('msg', trans('admin.rating_success'));
@@ -1281,13 +1312,15 @@ class WebController extends Controller
 
         $content = Content::where('mode', 'publish')->with('metas')->find($id);
 
-        if (!$content)
+        if (!$content) {
             abort(404);
+        }
 
-        if ($content->private == 1)
+        if ($content->private == 1) {
             $site_income = get_option('site_income_private');
-        else
+        } else {
             $site_income = get_option('site_income');
+        }
 
         $meta = arrayToList($content->metas, 'option', 'value');
 
@@ -1366,7 +1399,7 @@ class WebController extends Controller
                 'authority' => $ids,
                 'type' => 'subscribe',
                 'remain_time' => time() + $remain,
-                'type' => 'subscribe'
+                'type' => 'subscribe',
             ]);
             /** add payment ID to session **/
             if (isset($redirect_url)) {
@@ -1393,7 +1426,7 @@ class WebController extends Controller
                     'authority' => '000',
                     'income' => $Amount_pay - (($site_income / 100) * $Amount_pay),
                     'type' => 'subscribe',
-                    'remain_time' => time() + $remain
+                    'remain_time' => time() + $remain,
                 ]);
                 Sell::insert([
                     'user_id' => $content->user_id,
@@ -1403,7 +1436,7 @@ class WebController extends Controller
                     'created_at' => time(),
                     'mode' => 'pay',
                     'transaction_id' => $transaction->id,
-                    'remain_time' => time() + $remain
+                    'remain_time' => time() + $remain,
                 ]);
 
                 $seller->update(['income' => $seller->income + ((100 - $site_income) / 100) * $Amount_pay]);
@@ -1418,7 +1451,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $buyer->id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 Balance::create([
                     'title' => trans('admin.item_sold') . $content->title,
@@ -1428,7 +1461,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $seller->id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 Balance::create([
                     'title' => trans('admin.item_profit') . $content->title,
@@ -1438,7 +1471,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => 0,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
 
                 ## Notification Center
@@ -1484,12 +1517,11 @@ class WebController extends Controller
             ->with(['user', 'rate'])
             ->get();
 
-
         $data = [
             'posts' => $posts,
             'category' => $Category,
             'order' => $order,
-            'cats' => $cats
+            'cats' => $cats,
         ];
 
         return view(getTemplate() . '.view.article.list', $data);
@@ -1501,7 +1533,6 @@ class WebController extends Controller
         $post = Article::with(['category', 'user.usermetas'])
             ->where('mode', 'publish')
             ->find($id);
-
 
         if (empty($post)) {
             abort(404);
@@ -1519,7 +1550,6 @@ class WebController extends Controller
             ->inRandomOrder()
             ->get();
 
-
         $relContent = Content::where('mode', 'publish')
             ->where('category_id', $post->cat_id)
             ->with(['metas'])
@@ -1527,15 +1557,14 @@ class WebController extends Controller
             ->inRandomOrder()
             ->get();
 
-
         $post->increment('view');
 
         $data = [
-            'post'              => $post,
-            'rates'             => $rates,
-            'userContent'       => $userContent,
-            'relContent'        => $relContent,
-            'userArticleMeta'   => arrayToList($post->user->usermetas, 'option', 'value')
+            'post' => $post,
+            'rates' => $rates,
+            'userContent' => $userContent,
+            'relContent' => $relContent,
+            'userArticleMeta' => arrayToList($post->user->usermetas, 'option', 'value'),
         ];
 
         return view(getTemplate() . '.view.article.article', $data);
@@ -1573,14 +1602,14 @@ class WebController extends Controller
             $list->where('title', 'LIKE', '%' . $request->get('q', null) . '%');
         }
 
-        if(isset($user))
+        if (isset($user)) {
             $lists = $list->with(['content', 'category', 'fans' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             }])->withCount(['fans'])
                 ->get();
-        else
+        } else {
             $lists = $list->with(['content', 'category', 'fans'])->withCount(['fans'])->get();
-
+        }
 
         return view(getTemplate() . '.view.request.request', ['list' => $lists]);
     }
@@ -1588,8 +1617,9 @@ class WebController extends Controller
     public function newRequest()
     {
         $user = (auth()->check()) ? auth()->user() : null;
-        if ($user == null)
+        if ($user == null) {
             return redirect('/login?redirect=/request/new');
+        }
 
         return view(getTemplate() . '.view.request.new');
     }
@@ -1607,7 +1637,7 @@ class WebController extends Controller
                 'title' => $request->title,
                 'description' => $request->descriptoin,
                 'mode' => 'draft',
-                'created_at' => time()
+                'created_at' => time(),
             ]);
 
             ## Notification Center
@@ -1651,7 +1681,7 @@ class WebController extends Controller
                 RequestSuggestion::create([
                     'user_id' => $user->id,
                     'request_id' => $id,
-                    'content_id' => $content->id
+                    'content_id' => $content->id,
                 ]);
             }
             return redirect()->back()->with('msg', trans('admin.request_sent_alert'));
@@ -1691,13 +1721,13 @@ class WebController extends Controller
             $query->where('title', 'LIKE', '%' . $search_param . '%');
         }
 
-        if(isset($user))
+        if (isset($user)) {
             $records = $query->with(['content', 'category', 'fans' => function ($q) use ($user) {
                 $q->where('user_id', $user->id);
             }])->withCount(['fans'])->get();
-        else
+        } else {
             $records = $query->with(['content', 'category', 'fans'])->withCount(['fans'])->get();
-
+        }
 
         return view(getTemplate() . '.view.record.record', ['list' => $records]);
     }
@@ -1767,7 +1797,7 @@ class WebController extends Controller
     {
         $user = (auth()->check()) ? auth()->user() : null;
         if (!$user) {
-            return back()->with('msg','Please Login First');
+            return back()->with('msg', 'Please Login First');
         }
 
         $part = ContentPart::where('id', $id)
@@ -1785,12 +1815,13 @@ class WebController extends Controller
                 ->count();
 
             if ($sellCount == 0) {
-                return back()->with('msg','Please Purchase This Course First');
+                return back()->with('msg', 'Please Purchase This Course First');
             }
         }
 
-        if ($part->content->download == 0)
+        if ($part->content->download == 0) {
             abort(404);
+        }
 
         $storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
         $file = 'source/content-' . $part->content->id . '/video/part-' . $part->id . '.mp4';
@@ -1800,18 +1831,29 @@ class WebController extends Controller
         $file4 = 'source/content-' . $part->content->id . '/video/part-' . $part->id . '.rar';
         $file5 = 'source/content-' . $part->content->id . '/video/part-' . $part->id . '.mp3';
 
-        if (file_exists($storagePath . $file))
+        if (file_exists($storagePath . $file)) {
             return Response::download($storagePath . $file);
-        if (file_exists($storagePath . $file1))
+        }
+
+        if (file_exists($storagePath . $file1)) {
             return Response::download($storagePath . $file1);
-        if (file_exists($storagePath . $file2))
+        }
+
+        if (file_exists($storagePath . $file2)) {
             return Response::download($storagePath . $file2);
-        if (file_exists($storagePath . $file3))
+        }
+
+        if (file_exists($storagePath . $file3)) {
             return Response::download($storagePath . $file3);
-        if (file_exists($storagePath . $file4))
+        }
+
+        if (file_exists($storagePath . $file4)) {
             return Response::download($storagePath . $file4);
-        if (file_exists($storagePath . $file5))
+        }
+
+        if (file_exists($storagePath . $file5)) {
             return Response::download($storagePath . $file5);
+        }
 
         return back();
 
@@ -1830,15 +1872,22 @@ class WebController extends Controller
         if ($content) {
             //get duration of source
             preg_match("/Duration: (.*?), start:/", $content, $matches);
-            if (!isset($matches[1]))
+            if (!isset($matches[1])) {
                 return 'error';
+            }
+
             $rawDuration = $matches[1];
 
             //rawDuration is in 00:00:00.00 format. This converts it to seconds.
             $ar = array_reverse(explode(":", $rawDuration));
             $duration = floatval($ar[0]);
-            if (!empty($ar[1])) $duration += intval($ar[1]) * 60;
-            if (!empty($ar[2])) $duration += intval($ar[2]) * 60 * 60;
+            if (!empty($ar[1])) {
+                $duration += intval($ar[1]) * 60;
+            }
+
+            if (!empty($ar[2])) {
+                $duration += intval($ar[2]) * 60 * 60;
+            }
 
             //get the time in the file that is already encoded
             preg_match_all("/time=(.*?) bitrate/", $content, $matches);
@@ -1853,8 +1902,13 @@ class WebController extends Controller
             //rawTime is in 00:00:00.00 format. This converts it to seconds.
             $ar = array_reverse(explode(":", $rawTime));
             $time = floatval($ar[0]);
-            if (!empty($ar[1])) $time += intval($ar[1]) * 60;
-            if (!empty($ar[2])) $time += intval($ar[2]) * 60 * 60;
+            if (!empty($ar[1])) {
+                $time += intval($ar[1]) * 60;
+            }
+
+            if (!empty($ar[2])) {
+                $time += intval($ar[2]) * 60 * 60;
+            }
 
             //calculate the progress
             $progress = round(($time / $duration) * 100);
@@ -1874,7 +1928,7 @@ class WebController extends Controller
         $New = Login::create([
             'user_id' => $user,
             'created_at_sh' => time(),
-            'updated_at_sh' => time()
+            'updated_at_sh' => time(),
         ]);
         return $New;
     }
@@ -1886,7 +1940,7 @@ class WebController extends Controller
             'user_id' => $user_id,
             'product_id' => $product_id,
             'created_at_sh' => time(),
-            'updated_at_sh' => time()
+            'updated_at_sh' => time(),
         ]);
         return $New;
     }
@@ -1915,7 +1969,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $transaction->user_id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 $userUpdate = User::find($transaction->user_id);
                 $userUpdate->update(['credit' => $userUpdate->credit + $Amount]);
@@ -1939,7 +1993,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $Transaction->user_id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 $userUpdate = User::find($Transaction->user_id);
                 $userUpdate->update(['credit' => $userUpdate->credit + $Amount]);
@@ -1961,7 +2015,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $Transaction->user_id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 $userUpdate = User::find($Transaction->user_id);
                 $userUpdate->update(['credit' => $userUpdate->credit + $Amount]);
@@ -1971,15 +2025,15 @@ class WebController extends Controller
 
             }
         }
-        if (isset($request->gateway) && $request->gateway == 'razorpay'){
-            $razorpay = new \Razorpay\Api\Api(env('RAZORPAY_KEY_ID'),env('RAZORPAY_KEY_SECRET'));
+        if (isset($request->gateway) && $request->gateway == 'razorpay') {
+            $razorpay = new \Razorpay\Api\Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
             $order = $razorpay->utility->verifyPaymentSignature([
-                'razorpay_signature'    => $request->razorpay_signature,
-                'razorpay_payment_id'   => $request->razorpay_payment_id,
-                'razorpay_order_id'     => $request->razorpay_order_id
+                'razorpay_signature' => $request->razorpay_signature,
+                'razorpay_payment_id' => $request->razorpay_payment_id,
+                'razorpay_order_id' => $request->razorpay_order_id,
             ]);
-            if($order == null){
-                $Transaction = TransactionCharge::where('authority',$request->razorpay_order_id)->first();
+            if ($order == null) {
+                $Transaction = TransactionCharge::where('authority', $request->razorpay_order_id)->first();
                 $Amount = $Transaction->price;
                 Balance::create([
                     'title' => 'Wallet',
@@ -1989,7 +2043,7 @@ class WebController extends Controller
                     'mode' => 'auto',
                     'user_id' => $Transaction->user_id,
                     'exporter_id' => 0,
-                    'created_at' => time()
+                    'created_at' => time(),
                 ]);
                 $userUpdate = User::find($Transaction->user_id);
                 $userUpdate->update(['credit' => $userUpdate->credit + $Amount]);
@@ -1998,12 +2052,12 @@ class WebController extends Controller
                 return redirect('/user/balance/charge')->with('msg', trans('main.successful'));
             }
         }
-        if (isset($request->gateway) && $request->gateway == 'stripe'){
-            if(isset($request->session_id)) {
+        if (isset($request->gateway) && $request->gateway == 'stripe') {
+            if (isset($request->session_id)) {
                 Stripe::setApiKey(env('STRIPE_PRIVATE_KEY'));
                 $session = Session::retrieve($request->session_id);
                 if ($session && $session->payment_status == 'paid') {
-                    $Transaction = TransactionCharge::where('authority',$request->session_id)->first();
+                    $Transaction = TransactionCharge::where('authority', $request->session_id)->first();
                     $Amount = $Transaction->price;
                     Balance::create([
                         'title' => 'Wallet',
@@ -2013,7 +2067,7 @@ class WebController extends Controller
                         'mode' => 'auto',
                         'user_id' => $Transaction->user_id,
                         'exporter_id' => 0,
-                        'created_at' => time()
+                        'created_at' => time(),
                     ]);
                     $userUpdate = User::find($Transaction->user_id);
                     $userUpdate->update(['credit' => $userUpdate->credit + $Amount]);
@@ -2048,13 +2102,15 @@ class WebController extends Controller
         if ($result->getState() == 'approved') {
             $product = Content::find($transaction->content_id);
             $userUpdate = User::with('category')->find($transaction->user_id);
-            if ($product->private == 1)
+            if ($product->private == 1) {
                 $site_income = get_option('site_income_private') - $userUpdate->category->off;
-            else
+            } else {
                 $site_income = get_option('site_income') - $userUpdate->category->off;
+            }
 
-            if (empty($transaction))
+            if (empty($transaction)) {
                 \redirect('/product/' . $transaction->content_id);
+            }
 
             $Amount = $transaction->price;
 
@@ -2066,7 +2122,7 @@ class WebController extends Controller
                 'created_at' => time(),
                 'mode' => 'pay',
                 'transaction_id' => $transaction->id,
-                'remain_time' => $transaction->remain_time
+                'remain_time' => $transaction->remain_time,
             ]);
 
             $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2092,41 +2148,43 @@ class WebController extends Controller
         $Transaction = Transaction::find($transaction->getOrderId());
         $response = $transaction->response();
 
-        if($transaction->isSuccessful()){
+        if ($transaction->isSuccessful()) {
             $product = Content::find($Transaction->content_id);
             $userUpdate = User::with('category')->find($Transaction->user_id);
-            if($product->private == 1)
-                $site_income = get_option('site_income_private')-$userUpdate->category->off;
-            else
-                $site_income = get_option('site_income')-$userUpdate->category->off;
+            if ($product->private == 1) {
+                $site_income = get_option('site_income_private') - $userUpdate->category->off;
+            } else {
+                $site_income = get_option('site_income') - $userUpdate->category->off;
+            }
 
-            if(empty($transaction))
-                \redirect('/product/'.$Transaction->content_id);
+            if (empty($transaction)) {
+                \redirect('/product/' . $Transaction->content_id);
+            }
 
             $Amount = $Transaction->price;
 
             Sell::insert([
-                'user_id'       => $Transaction->user_id,
-                'buyer_id'      => $Transaction->buyer_id,
-                'content_id'    => $Transaction->content_id,
-                'type'          => $Transaction->type,
-                'created_at'    => time(),
-                'mode'          => 'pay',
-                'transaction_id'=> $Transaction->id,
-                'remain_time'   => $Transaction->remain_time
+                'user_id' => $Transaction->user_id,
+                'buyer_id' => $Transaction->buyer_id,
+                'content_id' => $Transaction->content_id,
+                'type' => $Transaction->type,
+                'created_at' => time(),
+                'mode' => 'pay',
+                'transaction_id' => $Transaction->id,
+                'remain_time' => $Transaction->remain_time,
             ]);
 
-            $userUpdate->update(['income'=>$userUpdate->income+((100-$site_income)/100)*$Amount]);
-            Transaction::find($Transaction->id)->update(['mode'=>'deliver','income'=>((100-$site_income)/100)*$Amount]);
+            $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
+            Transaction::find($Transaction->id)->update(['mode' => 'deliver', 'income' => ((100 - $site_income) / 100) * $Amount]);
 
             ## Notification Center
-            sendNotification(0,['[c.title]'=>$product->title],get_option('notification_template_buy_new'),'user',$Transaction->buyer_id);
+            sendNotification(0, ['[c.title]' => $product->title], get_option('notification_template_buy_new'), 'user', $Transaction->buyer_id);
 
-            return redirect('/product/'.$Transaction->content_id);
+            return redirect('/product/' . $Transaction->content_id);
 
-        }else if($transaction->isFailed()){
-            return \redirect('/product/'.$product_id)->with('msg',trans('admin.payment_failed'));
-        }else if($transaction->isOpen()){
+        } else if ($transaction->isFailed()) {
+            return \redirect('/product/' . $product_id)->with('msg', trans('admin.payment_failed'));
+        } else if ($transaction->isOpen()) {
             //Transaction Open/Processing
         }
     }
@@ -2139,29 +2197,31 @@ class WebController extends Controller
     public function payuStatus($product_id, Request $request)
     {
         $Payment = \Tzsk\Payu\Facade\Payment::capture();
-        if($Payment->status == 'Completed'){
-            $Transaction = Transaction::where('authority',$Payment->txnid)->first();
+        if ($Payment->status == 'Completed') {
+            $Transaction = Transaction::where('authority', $Payment->txnid)->first();
             $product = Content::find($Transaction->content_id);
             $userUpdate = User::with('category')->find($Transaction->user_id);
-            if ($product->private == 1)
+            if ($product->private == 1) {
                 $site_income = get_option('site_income_private') - $userUpdate->category->off;
-            else
+            } else {
                 $site_income = get_option('site_income') - $userUpdate->category->off;
+            }
 
-            if (empty($transaction))
+            if (empty($transaction)) {
                 \redirect('/product/' . $Transaction->content_id);
+            }
 
             $Amount = $Transaction->price;
 
             Sell::insert([
-                'user_id'       => $Transaction->user_id,
-                'buyer_id'      => $Transaction->buyer_id,
-                'content_id'    => $Transaction->content_id,
-                'type'          => $Transaction->type,
-                'created_at'    => time(),
-                'mode'          => 'pay',
-                'transaction_id'=> $Transaction->id,
-                'remain_time'   => $Transaction->remain_time
+                'user_id' => $Transaction->user_id,
+                'buyer_id' => $Transaction->buyer_id,
+                'content_id' => $Transaction->content_id,
+                'type' => $Transaction->type,
+                'created_at' => time(),
+                'mode' => 'pay',
+                'transaction_id' => $Transaction->id,
+                'remain_time' => $Transaction->remain_time,
             ]);
 
             $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2171,7 +2231,7 @@ class WebController extends Controller
             sendNotification(0, ['[c.title]' => $product->title], get_option('notification_template_buy_new'), 'user', $Transaction->buyer_id);
 
             return redirect('/product/' . $Transaction->content_id);
-        }else{
+        } else {
             return \redirect('/product/' . $product_id)->with('msg', trans('admin.payment_failed'));
         }
     }
@@ -2188,13 +2248,15 @@ class WebController extends Controller
             $Transaction = Transaction::find($payment['data']['metadata']['transaction']);
             $product = Content::find($Transaction->content_id);
             $userUpdate = User::with('category')->find($Transaction->user_id);
-            if ($product->private == 1)
+            if ($product->private == 1) {
                 $site_income = get_option('site_income_private') - $userUpdate->category->off;
-            else
+            } else {
                 $site_income = get_option('site_income') - $userUpdate->category->off;
+            }
 
-            if (empty($transaction))
+            if (empty($transaction)) {
                 \redirect('/product/' . $Transaction->content_id);
+            }
 
             $Amount = $Transaction->price;
 
@@ -2206,7 +2268,7 @@ class WebController extends Controller
                 'created_at' => time(),
                 'mode' => 'pay',
                 'transaction_id' => $Transaction->id,
-                'remain_time' => $Transaction->remain_time
+                'remain_time' => $Transaction->remain_time,
             ]);
 
             $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2222,42 +2284,43 @@ class WebController extends Controller
     }
 
     ## Razorpay
-    public function razorpayStatus($product_id, Request $request){
-        $razorpay = new \Razorpay\Api\Api(env('RAZORPAY_KEY_ID'),env('RAZORPAY_KEY_SECRET'));
+    public function razorpayStatus($product_id, Request $request)
+    {
+        $razorpay = new \Razorpay\Api\Api(env('RAZORPAY_KEY_ID'), env('RAZORPAY_KEY_SECRET'));
         $order = $razorpay->utility->verifyPaymentSignature([
-            'razorpay_signature'    => $request->razorpay_signature,
-            'razorpay_payment_id'   => $request->razorpay_payment_id,
-            'razorpay_order_id'     => $request->razorpay_order_id
+            'razorpay_signature' => $request->razorpay_signature,
+            'razorpay_payment_id' => $request->razorpay_payment_id,
+            'razorpay_order_id' => $request->razorpay_order_id,
         ]);
-        if($order == null){
-            $Transaction = Transaction::where('authority',$request->razorpay_order_id)->first();
+        if ($order == null) {
+            $Transaction = Transaction::where('authority', $request->razorpay_order_id)->first();
             $product = Content::find($Transaction->content_id);
             $userUpdate = User::with('category')->find($Transaction->user_id);
-            if ($product->private == 1 && isset($userUpdate->category->off))
+            if ($product->private == 1 && isset($userUpdate->category->off)) {
                 $site_income = get_option('site_income_private') - $userUpdate->category->off;
-            else{
-                if(isset($userUpdate->category->off)) {
+            } else {
+                if (isset($userUpdate->category->off)) {
                     $site_income = get_option('site_income') - $userUpdate->category->off;
-                }else{
+                } else {
                     $site_income = get_option('site_income');
                 }
             }
 
-
-            if (empty($Transaction))
+            if (empty($Transaction)) {
                 \redirect('/product/' . $Transaction->content_id);
+            }
 
             $Amount = $Transaction->price;
 
             Sell::insert([
-                'user_id'       => $Transaction->user_id,
-                'buyer_id'      => $Transaction->buyer_id,
-                'content_id'    => $Transaction->content_id,
-                'type'          => $Transaction->type,
-                'created_at'    => time(),
-                'mode'          => 'pay',
-                'transaction_id'=> $Transaction->id,
-                'remain_time'   => $Transaction->remain_time
+                'user_id' => $Transaction->user_id,
+                'buyer_id' => $Transaction->buyer_id,
+                'content_id' => $Transaction->content_id,
+                'type' => $Transaction->type,
+                'created_at' => time(),
+                'mode' => 'pay',
+                'transaction_id' => $Transaction->id,
+                'remain_time' => $Transaction->remain_time,
             ]);
 
             $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2267,13 +2330,14 @@ class WebController extends Controller
             sendNotification(0, ['[c.title]' => $product->title], get_option('notification_template_buy_new'), 'user', $Transaction->buyer_id);
 
             return redirect('/product/' . $Transaction->content_id);
-        }else{
+        } else {
             return \redirect('/product/' . $product_id)->with('msg', trans('admin.payment_failed'));
         }
     }
 
     ## Wecashup
-    public function wecashupCallback(Request  $request){
+    public function wecashupCallback(Request $request)
+    {
         header('Access-Control-Allow-Origin: *');
         header('Access-Control-Allow-Methods: GET, POST');
 
@@ -2281,22 +2345,22 @@ class WebController extends Controller
         $merchant_public_key = env('Merchant_Public_Key');
         $merchant_secret = env('Merchant_Secret_Key');
         $transaction_uid = '';
-        $transaction_token  = '';
-        $transaction_provider_name  = '';
-        $transaction_confirmation_code  = '';
-        if(isset($_POST['transaction_uid'])){
+        $transaction_token = '';
+        $transaction_provider_name = '';
+        $transaction_confirmation_code = '';
+        if (isset($_POST['transaction_uid'])) {
             $transaction_uid = $_POST['transaction_uid'];
         }
-        if(isset($_POST['transaction_token'])){
-            $transaction_token  = $_POST['transaction_token'];
+        if (isset($_POST['transaction_token'])) {
+            $transaction_token = $_POST['transaction_token'];
         }
-        if(isset($_POST['transaction_provider_name'])){
-            $transaction_provider_name  = $_POST['transaction_provider_name'];
+        if (isset($_POST['transaction_provider_name'])) {
+            $transaction_provider_name = $_POST['transaction_provider_name'];
         }
-        if(isset($_POST['transaction_confirmation_code'])){
-            $transaction_confirmation_code  = $_POST['transaction_confirmation_code'];
+        if (isset($_POST['transaction_confirmation_code'])) {
+            $transaction_confirmation_code = $_POST['transaction_confirmation_code'];
         }
-        $url = 'https://www.wecashup.com/api/v2.0/merchants/'.$merchant_uid.'/transactions/'.$transaction_uid.'?merchant_public_key='.$merchant_public_key;
+        $url = 'https://www.wecashup.com/api/v2.0/merchants/' . $merchant_uid . '/transactions/' . $transaction_uid . '?merchant_public_key=' . $merchant_public_key;
 
         $fields = array(
             'merchant_secret' => urlencode($merchant_secret),
@@ -2304,34 +2368,34 @@ class WebController extends Controller
             'transaction_uid' => urlencode($transaction_uid),
             'transaction_confirmation_code' => urlencode($transaction_confirmation_code),
             'transaction_provider_name' => urlencode($transaction_provider_name),
-            '_method' => urlencode('PATCH')
+            '_method' => urlencode('PATCH'),
         );
-        foreach($fields as $key=>$value) { $fields_string .= $key.'='.$value.'&'; }
+        foreach ($fields as $key => $value) {$fields_string .= $key . '=' . $value . '&';}
         rtrim($fields_string, '&');
         $ch = curl_init();
 
-        curl_setopt($ch, CURLOPT_URL,$url);
+        curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, count($fields));
         curl_setopt($ch, CURLOPT_POSTFIELDS, $fields_string);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
         //Step 9  : Retrieving the WeCashUp Response
 
-        $server_output = curl_exec ($ch);
+        $server_output = curl_exec($ch);
 
         echo $server_output;
 
-        curl_close ($ch);
+        curl_close($ch);
 
         $data = json_decode($server_output, true);
 
-        if($data['response_status'] =="success"){
+        if ($data['response_status'] == "success") {
 
             //Do wathever you want to tell the user that it's transaction succeed or redirect him/her to a success page
 
             $location = 'https://www.wecashup.cloud/cdn/tests/websites/PHP/responses_pages/success.html';
 
-        }else{
+        } else {
 
             //Do wathever you want to tell the user that it's transaction failed or redirect him/her to a failure page
 
@@ -2340,80 +2404,78 @@ class WebController extends Controller
         }
 
         //redirect to your feedback page
-        echo '<script>top.window.location = "'.$location.'"</script>';
+        echo '<script>top.window.location = "' . $location . '"</script>';
     }
-    public function wecashupHook(Request  $request){
+    public function wecashupHook(Request $request)
+    {
 
         $merchant_secret = env('Merchant_Secret_Key');
         $received_transaction_merchant_secret = null;
         $received_transaction_uid = null;
-        $received_transaction_status  = null;
+        $received_transaction_status = null;
         $received_transaction_details = null;
         $received_transaction_token = null;
         $authenticated = 'false';
 
-        if(isset($_POST['merchant_secret'])){
+        if (isset($_POST['merchant_secret'])) {
             $received_transaction_merchant_secret = $_POST['merchant_secret'];
         }
 
-        if(isset($_POST['transaction_uid'])){
+        if (isset($_POST['transaction_uid'])) {
             $received_transaction_uid = $_POST['transaction_uid'];
         }
-        if(isset($_POST['transaction_status'])){
-            $received_transaction_status  = $_POST['transaction_status'];
+        if (isset($_POST['transaction_status'])) {
+            $received_transaction_status = $_POST['transaction_status'];
         }
-        if(isset($_POST['transaction_amount'])){
-            $received_transaction_amount  = $_POST['transaction_amount'];
-        }
-
-        if(isset($_POST['transaction_receiver_currency'])){
-            $received_transaction_receiver_currency  = $_POST['transaction_receiver_currency'];
+        if (isset($_POST['transaction_amount'])) {
+            $received_transaction_amount = $_POST['transaction_amount'];
         }
 
-        if(isset($_POST['transaction_details'])){
-            $received_transaction_details  = $_POST['transaction_details'];
+        if (isset($_POST['transaction_receiver_currency'])) {
+            $received_transaction_receiver_currency = $_POST['transaction_receiver_currency'];
         }
 
-        if(isset($_POST['transaction_token'])){
-            $received_transaction_token  = $_POST['transaction_token'];
+        if (isset($_POST['transaction_details'])) {
+            $received_transaction_details = $_POST['transaction_details'];
         }
 
-        if(isset($_POST['transaction_type'])){
-            $received_transaction_type  = $_POST['transaction_type'];
+        if (isset($_POST['transaction_token'])) {
+            $received_transaction_token = $_POST['transaction_token'];
         }
 
-        echo '<br><br> received_transaction_merchant_secret : '.$received_transaction_merchant_secret;
-        echo '<br><br> received_transaction_uid : '.$received_transaction_uid;
-        echo '<br><br> received_transaction_token : '.$received_transaction_token;
-        echo '<br><br> received_transaction_details : '.$received_transaction_details;
-        echo '<br><br> received_transaction_amount : '.$received_transaction_amount;
-        echo '<br><br> received_transaction_status : '.$received_transaction_status;
-        echo '<br><br> received_transaction_type : '.$received_transaction_type;
+        if (isset($_POST['transaction_type'])) {
+            $received_transaction_type = $_POST['transaction_type'];
+        }
+
+        echo '<br><br> received_transaction_merchant_secret : ' . $received_transaction_merchant_secret;
+        echo '<br><br> received_transaction_uid : ' . $received_transaction_uid;
+        echo '<br><br> received_transaction_token : ' . $received_transaction_token;
+        echo '<br><br> received_transaction_details : ' . $received_transaction_details;
+        echo '<br><br> received_transaction_amount : ' . $received_transaction_amount;
+        echo '<br><br> received_transaction_status : ' . $received_transaction_status;
+        echo '<br><br> received_transaction_type : ' . $received_transaction_type;
 
         /***** SAVE THIS IN YOUD DATABASE - start ****************/
 
-
         /***** SAVE THIS IN YOUD DATABASE - end ****************/
 
-
-
 //Authentication |We make sure that the received data come from a system that knows our secret key (WeCashUp only)
-        if($received_transaction_merchant_secret !=null && $received_transaction_merchant_secret == $merchant_secret){
+        if ($received_transaction_merchant_secret != null && $received_transaction_merchant_secret == $merchant_secret) {
             //received_transaction_merchant_secret is Valid
 
             echo '<br><br> merchant_secret [MATCH]';
 
             //Now check if you have a transaction with the received_transaction_uid and received_transaction_token
 
-            $database_transaction_uid = 'TEST_UID';//************* LOAD FROM YOUR DATABASE ****************
-            $database_transaction_token = 'TEST_TOKEN';//************* LOAD FROM YOUR DATABASE ****************
+            $database_transaction_uid = 'TEST_UID'; //************* LOAD FROM YOUR DATABASE ****************
+            $database_transaction_token = 'TEST_TOKEN'; //************* LOAD FROM YOUR DATABASE ****************
 
-            if($received_transaction_uid != null && $received_transaction_uid == $database_transaction_uid){
+            if ($received_transaction_uid != null && $received_transaction_uid == $database_transaction_uid) {
                 //received_transaction_merchant_secret is Valid
 
                 echo '<br><br> transaction_uid [MATCH]';
 
-                if($received_transaction_token  != null && $received_transaction_token == $database_transaction_token){
+                if ($received_transaction_token != null && $received_transaction_token == $database_transaction_token) {
                     //received_transaction_token is Valid
 
                     echo '<br><br> transaction_token [MATCH]';
@@ -2424,31 +2486,31 @@ class WebController extends Controller
             }
         }
 
-        echo '<br><br>authenticated : '.$authenticated;
+        echo '<br><br>authenticated : ' . $authenticated;
 
-        if($authenticated == 'true'){
+        if ($authenticated == 'true') {
 
             //Update and process your transaction
 
-            if($received_transaction_status =="PAID"){
+            if ($received_transaction_status == "PAID") {
                 //Save the transaction status in your database and do whatever you want to tell the user that it's transaction succeed
-                echo '<br><br> transaction_status : '.$transaction_status;
+                echo '<br><br> transaction_status : ' . $transaction_status;
 
-            }else{ //Status = FAILED
+            } else { //Status = FAILED
 
                 //Save the transaction status in your database and do whatever you want to tell the user that it's transaction failed
-                echo '<br><br> transaction_status : '.$transaction_status;
+                echo '<br><br> transaction_status : ' . $transaction_status;
             }
 
             /***** SAVE THIS IN YOUD DATABASE - start ****************/
 
             $file = 'transactions.txt';
-            $txt = "received_transaction_merchant_secret : ".$received_transaction_merchant_secret."\n".
-                "received_transaction_uid : ".$received_transaction_uid."\n".
-                "received_transaction_token : ".$received_transaction_token."\n".
-                "received_transaction_details : ".$received_transaction_details."\n".
-                "received_transaction_status : ".$received_transaction_status."\n".
-                "received_transaction_type : ".$received_transaction_type."\n";
+            $txt = "received_transaction_merchant_secret : " . $received_transaction_merchant_secret . "\n" .
+                "received_transaction_uid : " . $received_transaction_uid . "\n" .
+                "received_transaction_token : " . $received_transaction_token . "\n" .
+                "received_transaction_details : " . $received_transaction_details . "\n" .
+                "received_transaction_status : " . $received_transaction_status . "\n" .
+                "received_transaction_type : " . $received_transaction_type . "\n";
 
             $myfile = fopen("newfile.txt", "w") or die("Unable to open file!");
             fwrite($myfile, $txt);
@@ -2456,22 +2518,23 @@ class WebController extends Controller
             /***** SAVE THIS IN YOUD DATABASE - end ****************/
 
             /*
-                NOTE : 	You can analyze each variable in order to process further operations like sending
-                        an email to the customer to inform him that his transaction failed or launching the
-                        delivery process if the transaction succeed.
-            */
+        NOTE :     You can analyze each variable in order to process further operations like sending
+        an email to the customer to inform him that his transaction failed or launching the
+        delivery process if the transaction succeed.
+         */
 
         }
     }
 
     ## Cintepay
-    public function cinetpayNotify(Request $request){
-        if(isset($request->cpm_trans_id)){
+    public function cinetpayNotify(Request $request)
+    {
+        if (isset($request->cpm_trans_id)) {
             $id_transaction = $_POST['cpm_trans_id'];
             $Transaction = Transaction::find($id_transaction);
             $platform = "PROD";
             $version = "V1";
-            $CinetPay = new CinetPay(env('CINET_SITE_ID'),env('CINET_API_KEY'),$platform,$version);
+            $CinetPay = new CinetPay(env('CINET_SITE_ID'), env('CINET_API_KEY'), $platform, $version);
             $CinetPay->setTransId($id_transaction)->getPayStatus();
             $cpm_site_id = $CinetPay->_cpm_site_id;
             $signature = $CinetPay->_signature;
@@ -2493,29 +2556,31 @@ class WebController extends Controller
             $cpm_trans_status = $CinetPay->_cpm_trans_status;
             $cpm_designation = $CinetPay->_cpm_designation;
             $buyer_name = $CinetPay->_buyer_name;
-            if($cpm_result == '00'){
-                if($Transaction->price == $cpm_amount){
+            if ($cpm_result == '00') {
+                if ($Transaction->price == $cpm_amount) {
                     $product = Content::find($Transaction->content_id);
                     $userUpdate = User::with('category')->find($Transaction->user_id);
-                    if ($product->private == 1)
+                    if ($product->private == 1) {
                         $site_income = get_option('site_income_private') - $userUpdate->category->off;
-                    else
+                    } else {
                         $site_income = get_option('site_income') - $userUpdate->category->off;
+                    }
 
-                    if (empty($Transaction))
+                    if (empty($Transaction)) {
                         abort(404);
+                    }
 
                     $Amount = $Transaction->price;
 
                     Sell::insert([
-                        'user_id'       => $Transaction->user_id,
-                        'buyer_id'      => $Transaction->buyer_id,
-                        'content_id'    => $Transaction->content_id,
-                        'type'          => $Transaction->type,
-                        'created_at'    => time(),
-                        'mode'          => 'pay',
-                        'transaction_id'=> $Transaction->id,
-                        'remain_time'   => $Transaction->remain_time
+                        'user_id' => $Transaction->user_id,
+                        'buyer_id' => $Transaction->buyer_id,
+                        'content_id' => $Transaction->content_id,
+                        'type' => $Transaction->type,
+                        'created_at' => time(),
+                        'mode' => 'pay',
+                        'transaction_id' => $Transaction->id,
+                        'remain_time' => $Transaction->remain_time,
                     ]);
 
                     $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2527,49 +2592,54 @@ class WebController extends Controller
             }
         }
     }
-    public function cinetpayReturn(Request $request){
+    public function cinetpayReturn(Request $request)
+    {
         if (isset($_POST['cpm_trans_id'])) {
             $Transaction = Transaction::find($request->cpm_trans_id);
-            if($Transaction && $Transaction->mode == 'deliver'){
+            if ($Transaction && $Transaction->mode == 'deliver') {
                 return redirect('/product/' . $Transaction->content_id);
-            }else{
+            } else {
                 return redirect('/product/' . $Transaction->content_id)->with('msg', trans('admin.payment_failed'));
             }
         }
     }
-    public function cinetpayCancel(Request $request){
+    public function cinetpayCancel(Request $request)
+    {
         return \redirect('/');
     }
 
     ## Stripe
-    public function stripeSuccess(Request $request){
-        if(isset($request->session_id)){
+    public function stripeSuccess(Request $request)
+    {
+        if (isset($request->session_id)) {
             Stripe::setApiKey(env('STRIPE_PRIVATE_KEY'));
             $session = Session::retrieve($request->session_id);
-            if($session && $session->payment_status == 'paid'){
+            if ($session && $session->payment_status == 'paid') {
 
-                $Transaction = Transaction::where('authority',$request->session_id)->first();
+                $Transaction = Transaction::where('authority', $request->session_id)->first();
                 $product = Content::find($Transaction->content_id);
                 $userUpdate = User::with('category')->find($Transaction->user_id);
-                if ($product->private == 1)
+                if ($product->private == 1) {
                     $site_income = get_option('site_income_private') - $userUpdate->category->off;
-                else
+                } else {
                     $site_income = get_option('site_income') - $userUpdate->category->off;
+                }
 
-                if (empty($Transaction))
+                if (empty($Transaction)) {
                     \redirect('/product/' . $Transaction->content_id);
+                }
 
                 $Amount = $Transaction->price;
 
                 Sell::insert([
-                    'user_id'       => $Transaction->user_id,
-                    'buyer_id'      => $Transaction->buyer_id,
-                    'content_id'    => $Transaction->content_id,
-                    'type'          => $Transaction->type,
-                    'created_at'    => time(),
-                    'mode'          => 'pay',
-                    'transaction_id'=> $Transaction->id,
-                    'remain_time'   => $Transaction->remain_time
+                    'user_id' => $Transaction->user_id,
+                    'buyer_id' => $Transaction->buyer_id,
+                    'content_id' => $Transaction->content_id,
+                    'type' => $Transaction->type,
+                    'created_at' => time(),
+                    'mode' => 'pay',
+                    'transaction_id' => $Transaction->id,
+                    'remain_time' => $Transaction->remain_time,
                 ]);
 
                 $userUpdate->update(['income' => $userUpdate->income + ((100 - $site_income) / 100) * $Amount]);
@@ -2580,12 +2650,13 @@ class WebController extends Controller
 
                 return redirect('/product/' . $Transaction->content_id);
             }
-        }else{
-            return \redirect('/product/'.$request->content_id);
+        } else {
+            return \redirect('/product/' . $request->content_id);
         }
     }
-    public function stripeCancel(Request $request){
-        return \redirect('/product/'.$request->content_id);
+    public function stripeCancel(Request $request)
+    {
+        return \redirect('/product/' . $request->content_id);
     }
 
 }

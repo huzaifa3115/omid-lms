@@ -41,12 +41,12 @@
                         <span>{{ trans('main.support') }}</span>
                     </a>
                 </div>
-                <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
+                <!-- <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                     <a href="/user/article" class="item-box sbox3" id="article-hover">
                         <span class="micon mdi mdi-notebook"></span>
                         <span>{{ trans('main.articles') }}</span>
                     </a>
-                </div>
+                </div> -->
                 <div class="h-10 visible-xs"></div>
                 <div class="col-md-1 col-sm-6 col-xs-6 tab-con">
                     <a href="/user/profile" class="item-box sbox3" id="profile-hover">

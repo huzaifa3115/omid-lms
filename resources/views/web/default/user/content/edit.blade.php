@@ -172,7 +172,7 @@
                                 <label class="control-label col-md-4 tab-con">{{ trans('main.price') }}</label>
                                 <div class="col-md-8 tab-con">
                                     <div class="input-group">
-                                        <input type="number" name="price" onkeypress="validate(event)" value="{{ $meta['price'] }}" class="form-control text-center numtostr" @if($item->price === 0) disabled @endif>
+                                        <input type="number" name="price" onkeypress="validate(event)" value="{{$meta['price'] ?? ''}}" class="form-control text-center numtostr" @if($item->price === 0) disabled @endif>
                                         <span class="input-group-addon click-for-upload img-icon-s">{{ currencySign() }}</span>
                                     </div>
 

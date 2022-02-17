@@ -53,8 +53,8 @@ use App\Models\Usercategories;
 use App\Models\Usermeta;
 use App\Models\UserRate;
 use App\Models\UserRateRelation;
-use App\User;
 use App\Models\ViewTemplate;
+use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
@@ -64,26 +64,18 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\URL;
 use Intervention\Image\Facades\Image;
 use Maatwebsite\Excel\Facades\Excel;
-use PayPal\Api\Amount;
-use PayPal\Api\Item;
-use PayPal\Api\ItemList;
-use PayPal\Api\Payer;
-use PayPal\Api\Payment;
-use PayPal\Api\PaymentExecution;
-use PayPal\Api\RedirectUrls;
 use PayPal\Auth\OAuthTokenCredential;
 use PayPal\Rest\ApiContext;
 
 class AdminController extends Controller
 {
 
-
     public function __construct()
     {
         $paypal_conf = \Config::get('paypal');
         $this->_api_context = new ApiContext(new OAuthTokenCredential(
-                $paypal_conf['client_id'],
-                $paypal_conf['secret'])
+            $paypal_conf['client_id'],
+            $paypal_conf['secret'])
         );
         $this->_api_context->setConfig($paypal_conf['settings']);
     }
@@ -110,7 +102,7 @@ class AdminController extends Controller
         if (!empty($password) and !empty($re_password) and $password == $re_password) {
             $new_password = Hash::make($password);
             $admin->update([
-                'password' => $new_password
+                'password' => $new_password,
             ]);
 
             return Redirect::back()->withErrors([trans('admin.password_changed')]);
@@ -142,7 +134,7 @@ class AdminController extends Controller
             'adminCount' => $adminCount,
             'buyerCount' => $buyerCount,
             'sellerCount' => $sellerCount,
-            'dayRegister' => $dayRegister
+            'dayRegister' => $dayRegister,
         ];
 
         return view('admin.report.user', $data);
@@ -159,7 +151,7 @@ class AdminController extends Controller
             'contentCount' => $contentCount,
             'videoCount' => $videoCount,
             'dayRegister' => $dayRegister,
-            'videoRegister' => $videoRegister
+            'videoRegister' => $videoRegister,
         ];
 
         return view('admin.report.content', $data);
@@ -182,7 +174,7 @@ class AdminController extends Controller
             'transactionCount' => $transactionCount,
             'allIncome' => $allIncome,
             'userIncome' => $userIncome,
-            'siteIncome' => $siteIncome
+            'siteIncome' => $siteIncome,
         ];
 
         return view('admin.report.balance', $data);
@@ -244,8 +236,10 @@ class AdminController extends Controller
             $user->created_at = time();
             $user->admin = 1;
             $user->last_view = time();
-            if ($user->save())
+            if ($user->save()) {
                 return redirect('/admin/manager/item/' . $user->id);
+            }
+
         } else {
             $request->session()->flash('Error', 'duplicate');
             return back();
@@ -342,7 +336,8 @@ class AdminController extends Controller
         return back();
     }
 
-    public function userPassword($id){
+    public function userPassword($id)
+    {
         $user = User::find($id);
     }
 
@@ -383,7 +378,7 @@ class AdminController extends Controller
                 'mode' => 'auto',
                 'user_id' => $id,
                 'exporter_id' => 0,
-                'created_at' => time()
+                'created_at' => time(),
             ]);
             $userUp = User::find($id);
             $userUp->update(['credit' => $userUp->credit + $userRate->gift]);
@@ -536,15 +531,14 @@ class AdminController extends Controller
             Event::create([
                 'user_id' => $admin->id,
                 'type' => 'Admin Login',
-                'ip' => $request->ip()
+                'ip' => $request->ip(),
             ]);
 
             return redirect('/user');
         }
 
-        abort(404);;
+        abort(404);
     }
-
 
     ####################
     ###Ticket Section###
@@ -571,14 +565,14 @@ class AdminController extends Controller
             'created_at' => time(),
             'updated_at' => time(),
             'mode' => 'open',
-            'category_id' => $request->category_id
+            'category_id' => $request->category_id,
         ]);
         TicketsMsg::create([
             'ticket_id' => $ticket->id,
             'msg' => $request->msg,
             'created_at' => time(),
             'user_id' => $admin->id,
-            'mode' => 'admin'
+            'mode' => 'admin',
         ]);
         return redirect('admin/ticket/reply/' . $ticket->id);
     }
@@ -590,12 +584,17 @@ class AdminController extends Controller
 
         $lists = Tickets::with('user', 'category')->where('mode', 'open');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
+        }
 
         $lists = $lists->get();
         $users = User::all();
@@ -611,12 +610,17 @@ class AdminController extends Controller
             $q->with('user');
         }])->where('mode', '')->orWhere('mode', 'close');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
+        }
 
         $lists = $lists->get();
         $users = User::all();
@@ -749,7 +753,6 @@ class AdminController extends Controller
         return back();
     }
 
-
     ##########################
     ###Notification Section###
     ##########################
@@ -796,10 +799,12 @@ class AdminController extends Controller
             default:
                 $notification->recipent_list = '';
         }
-        if ($notification->save())
+        if ($notification->save()) {
             $request->session()->flash('status', 'success');
-        else
+        } else {
             $request->session()->flash('status', 'error');
+        }
+
         return redirect('/admin/notification/edit/' . $notification->id);
     }
 
@@ -875,20 +880,29 @@ class AdminController extends Controller
             $w->where('mode', 'publish');
         });
 
-
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
-            $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
-            $lists->where('user_id', $request->get('user', null));
-        if ($request->get('cat', null) !== null)
-            $lists->where('category_id', $request->get('cat', null));
-        if ($request->get('id', null) !== null)
-            $lists->where('id', $request->get('id', null));
-        if ($request->get('title', null) !== null)
-            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
+        if ($ldate > 12601) {
+            $lists->where('created_at', '<', $ldate);
+        }
+
+        if ($request->get('user', null) !== null) {
+            $lists->where('user_id', $request->get('user', null));
+        }
+
+        if ($request->get('cat', null) !== null) {
+            $lists->where('category_id', $request->get('cat', null));
+        }
+
+        if ($request->get('id', null) !== null) {
+            $lists->where('id', $request->get('id', null));
+        }
+
+        if ($request->get('title', null) !== null) {
+            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
@@ -909,9 +923,9 @@ class AdminController extends Controller
                     break;
 
             }
-        } else
+        } else {
             $lists->orderBy('id', 'DESC');
-
+        }
 
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
@@ -943,7 +957,7 @@ class AdminController extends Controller
         $data = [
             'lists' => $lists,
             'users' => $users,
-            'category' => $category
+            'category' => $category,
         ];
 
         return view('admin.content.list', $data);
@@ -964,21 +978,31 @@ class AdminController extends Controller
             $w->where('mode', 'delete')->orWhere('mode', 'request');
         });
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->whereHas('categories', function ($qu, $request) {
                 $qu->where('category_id', $request->get('cat', null));
             });
-        if ($request->get('id', null) !== null)
-            $lists->where('id', $request->get('id', null));
-        if ($request->get('title', null) !== null)
-            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
+        if ($request->get('id', null) !== null) {
+            $lists->where('id', $request->get('id', null));
+        }
+
+        if ($request->get('title', null) !== null) {
+            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
@@ -999,8 +1023,9 @@ class AdminController extends Controller
                     break;
 
             }
-        } else
+        } else {
             $lists->orderBy('id', 'DESC');
+        }
 
         $lists = $lists->paginate(15);
 
@@ -1045,21 +1070,31 @@ class AdminController extends Controller
             $q->where('mode', 'deliver');
         }])->withCount('sells', 'partsactive')->where('mode', 'draft');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->whereHas('categories', function ($qu, $request) {
                 $qu->where('category_id', $request->get('cat', null));
             });
-        if ($request->get('id', null) !== null)
-            $lists->where('id', $request->get('id', null));
-        if ($request->get('title', null) !== null)
-            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
+        if ($request->get('id', null) !== null) {
+            $lists->where('id', $request->get('id', null));
+        }
+
+        if ($request->get('title', null) !== null) {
+            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
@@ -1115,7 +1150,7 @@ class AdminController extends Controller
             'lists' => $lists,
             'users' => $users,
             'category' => $category,
-            'mode' => 'draft'
+            'mode' => 'draft',
         ];
 
         return view('admin.content.list', $data);
@@ -1134,21 +1169,31 @@ class AdminController extends Controller
             $q->where('mode', 'deliver');
         }])->withCount('sells', 'partsactive')->where('user_id', $id);
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->whereHas('categories', function ($qu) use ($request) {
                 $qu->where('category_id', $request->get('cat', null));
             });
-        if ($request->get('id', null) !== null)
-            $lists->where('id', $request->get('id', null));
-        if ($request->get('title', null) !== null)
-            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
+        if ($request->get('id', null) !== null) {
+            $lists->where('id', $request->get('id', null));
+        }
+
+        if ($request->get('title', null) !== null) {
+            $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
 
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
@@ -1169,8 +1214,9 @@ class AdminController extends Controller
                     break;
 
             }
-        } else
+        } else {
             $lists->orderBy('id', 'DESC');
+        }
 
         $lists = $lists->paginate(30);
 
@@ -1221,8 +1267,8 @@ class AdminController extends Controller
         $contentMenu = contentMenu();
         $filters = ContentCategoryFilter::where('category_id', $item->category_id)->with('tags')->get();
         $products = Content::where('mode', 'publish')->get();
-        $categories = ContentCategory::orderBy('id','DESC')->get();
-        return view('admin.content.edit', ['categories'=>$categories,'item' => $item, 'meta' => $meta, 'menus' => $contentMenu, 'filters' => $filters, 'products' => $products]);
+        $categories = ContentCategory::orderBy('id', 'DESC')->get();
+        return view('admin.content.edit', ['categories' => $categories, 'item' => $item, 'meta' => $meta, 'menus' => $contentMenu, 'filters' => $filters, 'products' => $products]);
     }
 
     public function contentDelete($id)
@@ -1245,11 +1291,13 @@ class AdminController extends Controller
             $content = Content::with('user')->find($id);
 
             ## Notification Center
-            if ($request->mode == 'publish' && $request->mode != $content->mode)
-                sendNotification(0, ['[u.name]' => $content->user->name, '[c.title]' => $content->title], get_option('notification_template_content_publish'), 'user', $content->user->id);
-            if ($request->mode == 'waiting')
-                sendNotification(0, ['[u.name]' => $content->user->name, '[c.title]' => $content->title], get_option('notification_template_content_change'), 'user', $content->user->id);
+            if ($request->mode == 'publish' && $request->mode != $content->mode) {
+                // sendNotification(0, ['[u.name]' => $content->user->name, '[c.title]' => $content->title], get_option('notification_template_content_publish'), 'user', $content->user->id);
+            }
 
+            if ($request->mode == 'waiting') {
+                // sendNotification(0, ['[u.name]' => $content->user->name, '[c.title]' => $content->title], get_option('notification_template_content_change'), 'user', $content->user->id);
+            }
 
             $content->update($request->except('files'));
             return Redirect::to(URL::previous() . '#main');
@@ -1257,8 +1305,9 @@ class AdminController extends Controller
         if ($mode == 'meta') {
             $request = $request->all();
 
-            if (isset($request['precourse']))
+            if (isset($request['precourse'])) {
                 $request['precourse'] = implode(',', $request['precourse']) . ',';
+            }
 
             foreach ($request as $key => $val) {
                 $res = ContentMeta::updateOrCreate(
@@ -1293,18 +1342,30 @@ class AdminController extends Controller
             $lists->where('mode', $request->get('mode'));
         }
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->where('category_id', $request->get('cat', null));
-        if ($request->get('id', null) !== null)
+        }
+
+        if ($request->get('id', null) !== null) {
             $lists->where('id', $request->get('id', null));
-        if ($request->get('title', null) !== null)
+        }
+
+        if ($request->get('title', null) !== null) {
             $lists->where('title', 'like', '%' . $request->get('title', null) . '%');
+        }
+
         if ($request->get('order', null) != null) {
             switch ($request->get('order', null)) {
                 case 'sella':
@@ -1327,7 +1388,6 @@ class AdminController extends Controller
         } else {
             $lists->orderBy('id', 'DESC');
         }
-
 
         $lists = $lists->get();
 
@@ -1385,10 +1445,11 @@ class AdminController extends Controller
         ContentComment::where('parent', $id)->update(['mode' => $action]);
 
         ## Notification Center
-        if ($action == 'publish')
+        if ($action == 'publish') {
             if (!empty($comment->content)) {
                 sendNotification(0, ['[c.title]' => $comment->content->title], get_option('notification_template_content_comment_new'), 'user', $comment->content->user->id);
             }
+        }
 
         return back();
     }
@@ -1452,10 +1513,11 @@ class AdminController extends Controller
         $storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
         $file = 'source/content-' . $id . '/video/part-' . $pid . '.mp4';
 
-        if (file_exists($storagePath . $file))
+        if (file_exists($storagePath . $file)) {
             $convert = $storagePath . $file;
-        else
+        } else {
             $convert = false;
+        }
 
         return view('admin.content.partedit', ['item' => $item, 'meta' => $meta, 'menus' => $contentMenu, 'part' => $part, 'convert' => $convert, 'products' => $products]);
     }
@@ -1563,10 +1625,14 @@ class AdminController extends Controller
 
     public function contentCategoryFilterStore(Request $request, $mode)
     {
-        if ($mode == 'new')
+        if ($mode == 'new') {
             ContentCategoryFilter::create($request->all());
-        if ($mode == 'edit')
+        }
+
+        if ($mode == 'edit') {
             ContentCategoryFilter::find($request->id)->update(['filter' => $request->filter, 'sort' => $request->sort]);
+        }
+
         return back();
     }
 
@@ -1585,8 +1651,10 @@ class AdminController extends Controller
 
     public function contentCategoryFilterTagNew(Request $request, $mode)
     {
-        if ($mode == 'new')
+        if ($mode == 'new') {
             ContentCategoryFilterTag::insert($request->all());
+        }
+
         if ($mode == 'edit') {
             ContentCategoryFilterTag::find($request->id)->update(['tag' => $request->tag, 'sort' => $request->sort]);
         }
@@ -1607,7 +1675,6 @@ class AdminController extends Controller
         return back();
     }
 
-
     #######################
     ### Request Section ###
     #######################
@@ -1620,12 +1687,17 @@ class AdminController extends Controller
 
         $lists = Requests::with('user', 'category')->withCount('fans')->orderBy('id', 'DESC');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->where('category_id', $request->get('cat', null));
+        }
 
         $lists = $lists->get();
 
@@ -1673,12 +1745,17 @@ class AdminController extends Controller
 
         $lists = Record::with('user', 'category')->withCount('fans')->orderBy('id', 'DESC');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('cat', null) !== null)
+        }
+
+        if ($request->get('cat', null) !== null) {
             $lists->where('category_id', $request->get('cat', null));
+        }
 
         $lists = $lists->get();
 
@@ -1702,7 +1779,6 @@ class AdminController extends Controller
         Record::find($id)->update(['mode' => 'publish']);
         return back();
     }
-
 
     ##################
     ###Blog Section###
@@ -1861,7 +1937,7 @@ class AdminController extends Controller
             'name' => $admin->name,
             'post_id' => $request->post_id,
             'parent' => $request->parent,
-            'mode' => 'publish'
+            'mode' => 'publish',
         ]);
         return redirect('admin/blog/comment/edit/' . $comment->id);
     }
@@ -1883,9 +1959,9 @@ class AdminController extends Controller
 
     public function articleEdit($id)
     {
-        $article    = Article::find($id);
+        $article = Article::find($id);
         $categories = ContentCategory::get();
-        return view('admin.blog.articleedit', ['item' => $article,'categories'=>$categories]);
+        return view('admin.blog.articleedit', ['item' => $article, 'categories' => $categories]);
     }
 
     public function articleDelete($id)
@@ -1970,7 +2046,7 @@ class AdminController extends Controller
                     'font' => array(
                         'name' => 'Tahoma',
                         'size' => 12,
-                        'text-align' => 'center'
+                        'text-align' => 'center',
                     )));
                 $sheet->appendRow(array(
                     trans('admin.channel_title'),
@@ -1982,16 +2058,17 @@ class AdminController extends Controller
                     trans('admin.views'),
                 ));
                 foreach ($lists as $item) {
-                    if ($item->formal == 'ok')
+                    if ($item->formal == 'ok') {
                         $formal = trans('admin.verified');
-                    else
+                    } else {
                         $formal = trans('admin.not_verified');
+                    }
 
-                    if ($item->mode == 'active')
+                    if ($item->mode == 'active') {
                         $mode = trans('admin.active');
-                    else
+                    } else {
                         $mode = trans('admin.disabled');
-
+                    }
 
                     $sheet->appendRow(array(
                         $item->title,
@@ -2000,7 +2077,7 @@ class AdminController extends Controller
                         $formal,
                         $item->contents_count,
                         $mode,
-                        $item->view
+                        $item->view,
                     ));
                 }
             });
@@ -2041,16 +2118,26 @@ class AdminController extends Controller
 
         $lists = Sell::with('user', 'buyer', 'content', 'transaction')->orderBy('id', 'DESC');
 
-        if ($fdate > 12601)
+        if ($fdate > 12601) {
             $lists->where('created_at', '>', $fdate);
-        if ($ldate > 12601)
+        }
+
+        if ($ldate > 12601) {
             $lists->where('created_at', '<', $ldate);
-        if ($request->get('user', null) !== null)
+        }
+
+        if ($request->get('user', null) !== null) {
             $lists->where('user_id', $request->get('user', null));
-        if ($request->get('buyer', null) !== null)
+        }
+
+        if ($request->get('buyer', null) !== null) {
             $lists->where('buyer_id', $request->get('buyer', null));
-        if ($request->get('content', null) !== null)
+        }
+
+        if ($request->get('content', null) !== null) {
             $lists->where('content_id', $request->get('content', null));
+        }
+
         if ($request->get('type', null) !== null) {
             switch ($request->get('type', null)) {
                 case 'download':
@@ -2076,7 +2163,6 @@ class AdminController extends Controller
         $lists = $lists->get();
         return view('admin.sell.sell', ['lists' => $lists, 'contents' => $contents, 'users' => $users]);
     }
-
 
     #####################
     ## Balance Section ##
@@ -2105,17 +2191,21 @@ class AdminController extends Controller
         if (!empty($request->get('user_id'))) {
             $userUp = User::find($request->get('user_id'));
             if ($request->get('type') == 'add') {
-                if ($request->get('account') == 'credit')
+                if ($request->get('account') == 'credit') {
                     $userUp->update(['credit' => $userUp->credit + $request->get('price')]);
-                else
+                } else {
                     $userUp->update(['income' => $userUp->income + $request->get('price')]);
+                }
+
                 ## Notification Center
                 sendNotification(0, ['[b.amount]' => $request->get('price'), '[b.description]' => $request->get('description'), '[b.type]' => 'Add'], get_option('notification_template_withdraw_new'), 'user', $request->get('user_id'));
             } else {
-                if ($request->get('account') == 'credit')
+                if ($request->get('account') == 'credit') {
                     $userUp->update(['credit' => $userUp->credit - $request->get('price')]);
-                else
+                } else {
                     $userUp->update(['income' => $userUp->income - $request->get('price')]);
+                }
+
                 ## Notification Center
                 sendNotification(0, ['[b.amount]' => $request->get('price'), '[b.description]' => $request->get('description'), '[b.type]' => 'کسر'], get_option('notification_template_withdraw_new'), 'user', $request->get('user_id'));
             }
@@ -2145,10 +2235,12 @@ class AdminController extends Controller
         Balance::find($id)->update($request->all());
         if (isset($request->user_id)) {
             $userUp = User::find($request->user_id);
-            if ($request->type == 'add')
+            if ($request->type == 'add') {
                 $userUp->update(['credit' => $userUp->credit + $request->price]);
-            else
+            } else {
                 $userUp->update(['credit' => $userUp->credit - $request->price]);
+            }
+
         }
         return back();
     }
@@ -2168,7 +2260,6 @@ class AdminController extends Controller
             $lists = Balance::with('exporter', 'user')->orderBy('id', 'DESC')->get();
         }
 
-
         return Excel::download(new BalanceAdminExport($lists), trans('admin.financial_documents') . '.xlsx');
     }
 
@@ -2185,14 +2276,15 @@ class AdminController extends Controller
         $users = User::with(['usermetas', 'sells' => function ($q) {
             $q->where('mode', 'pay')->where('type', 'post')->where('post_confirm', null);
         }]);
-        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null)
+        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null)
+        } elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null)
+        } elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null) {
             $users->where('income', '>=', $request->get('price', null))->orderBy('id', 'DESC');
-        else
+        } else {
             $users->orderBy('id', 'DESC');
+        }
 
         if ($request->get('withdraw', null) != null) {
             $users->where('income', '>=', $request->get('withdraw', null));
@@ -2218,9 +2310,8 @@ class AdminController extends Controller
             }
         }
 
-
         $allsum = $users->sum('income');
-        return view('admin.balance.withdraw', ['users' => $users, 'users_not_apply' => (object)$users_not_apply, 'users_sell_post' => (object)$users_sell_post, 'first' => $first, 'last' => $last, 'allsum' => $allsum]);
+        return view('admin.balance.withdraw', ['users' => $users, 'users_not_apply' => (object) $users_not_apply, 'users_sell_post' => (object) $users_sell_post, 'first' => $first, 'last' => $last, 'allsum' => $allsum]);
     }
 
     public function balanceWithdrawAll(Request $request)
@@ -2230,22 +2321,27 @@ class AdminController extends Controller
         $users = User::with(['usermetas', 'sells' => function ($q) {
             $q->where('mode', 'pay')->where('type', 'post')->where('post_confirm', null);
         }]);
-        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null)
+        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->where('income', '>=', get_option('site_withdraw_price', 0))->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null)
+        } elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->where('income', '>=', $request->get('price', null))->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null)
+        } elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null) {
             $users->where('income', '>=', $request->get('price', null))->orderBy('id', 'DESC');
-        else
+        } else {
             $users->where('income', '>=', get_option('site_withdraw_price', 0))->orderBy('id', 'DESC');
+        }
 
         $users = $users->get();
         foreach ($users as $index => $wuser) {
             $seller_apply = userMeta($wuser->id, 'seller_apply', 0);
-            if ($seller_apply == 0)
+            if ($seller_apply == 0) {
                 $users->forget($index);
-            if (count($wuser->sells) > 0)
+            }
+
+            if (count($wuser->sells) > 0) {
                 $users->forget($index);
+            }
+
         }
 
         $admin = auth()->user();
@@ -2258,7 +2354,7 @@ class AdminController extends Controller
                 'user_id' => $user->id,
                 'description' => $request->description,
                 'exporter_id' => $admin->id,
-                'created_at' => time()
+                'created_at' => time(),
             ]);
             User::find($user->id)->update(['income' => 0]);
             ## Notification Center
@@ -2275,22 +2371,27 @@ class AdminController extends Controller
         $users = User::with(['usermetas', 'sells' => function ($q) {
             $q->where('mode', 'pay')->where('type', 'post')->where('post_confirm', '');
         }]);
-        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null)
+        if ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->where('income', '>=', get_option('site_withdraw_price', 0))->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null)
+        } elseif ($request->get('fdate', null) !== null && $request->get('ldate', null) !== null && $request->get('price', null) !== null) {
             $users->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->where('income', '>=', $request->get('price', null))->orderBy('id', 'DESC');
-        elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null)
+        } elseif ($request->get('fdate', null) == null && $request->get('ldate', null) == null && $request->get('user_id', null) !== null) {
             $users->where('income', '>=', $request->get('price', null))->orderBy('id', 'DESC');
-        else
+        } else {
             $users->where('income', '>=', get_option('site_withdraw_price', 0))->orderBy('id', 'DESC');
+        }
 
         $users = $users->get();
         foreach ($users as $index => $wuser) {
             $seller_apply = userMeta($wuser->id, 'seller_apply', 0);
-            if ($seller_apply == 0)
+            if ($seller_apply == 0) {
                 $users->forget($index);
-            if (count($wuser->sells) > 0)
+            }
+
+            if (count($wuser->sells) > 0) {
                 $users->forget($index);
+            }
+
         }
 
         $allsum = $users->sum('income');
@@ -2310,14 +2411,15 @@ class AdminController extends Controller
                 ->orWhere('user_id', null);
         });
 
-        if ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null)
+        if ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null) {
             $lists->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->orderBy('id', 'DESC');
-        elseif ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null && $request->get('user_id', null) !== null)
+        } elseif ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null && $request->get('user_id', null) !== null) {
             $lists->where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->where('user_id', $request->get('user_id', null))->orderBy('id', 'DESC');
-        elseif ($request->get('fsdate', null) == null && $request->get('lsdate', null) == null && $request->get('user_id', null) !== null)
+        } elseif ($request->get('fsdate', null) == null && $request->get('lsdate', null) == null && $request->get('user_id', null) !== null) {
             $lists->where('user_id', $request->get('user_id', null))->orderBy('id', 'DESC');
-        else
+        } else {
             $lists->orderBy('id', 'DESC');
+        }
 
         $lists = $lists->get();
         $first = $lists->first();
@@ -2331,7 +2433,7 @@ class AdminController extends Controller
             'first' => $first,
             'last' => $last,
             'alladd' => $alladd,
-            'allminus' => $allminus
+            'allminus' => $allminus,
         ];
 
         return view('admin.balance.analyze', $data);
@@ -2347,10 +2449,12 @@ class AdminController extends Controller
     {
         $fdate = strtotime($request->get('fsdate', null));
         $ldate = strtotime($request->get('lsdate', null));
-        if ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null)
+        if ($request->get('fsdate', null) !== null && $request->get('lsdate', null) !== null) {
             $lists = Transaction::where('created_at', '>', $fdate)->where('created_at', '<', $ldate)->with('user', 'buyer', 'content')->orderBy('id', 'DESC')->get();
-        else
+        } else {
             $lists = Transaction::with('user', 'buyer', 'content')->orderBy('id', 'DESC')->get();
+        }
+
         $first = $lists->first();
         $last = $lists->last();
         $allPrice = $lists->sum('price');
@@ -2358,7 +2462,6 @@ class AdminController extends Controller
         $siteIncome = $allPrice - $userIncome;
         return view('admin.report.transaction', ['lists' => $lists, 'first' => $first, 'last' => $last, 'allPrice' => $allPrice, 'siteIncome' => $siteIncome]);
     }
-
 
     ###################
     ###Email Section###
@@ -2407,7 +2510,7 @@ class AdminController extends Controller
             $Template = EmailTemplate::find($request->id);
             $Template->update([
                 'title' => $request->title,
-                'template' => $request->template
+                'template' => $request->template,
             ]);
             cache()->forget('email.template.' . $Template->id);
             $Template->refresh();
@@ -2419,13 +2522,14 @@ class AdminController extends Controller
     {
 
         $send = sendMail($request->toArray());
-        if ($send)
+        if ($send) {
             $request->session()->flash('status', $send);
-        else
+        } else {
             $request->session()->flash('status', 'error');
+        }
+
         return back();
     }
-
 
     ######################
     ###Discount Section###
@@ -2494,14 +2598,15 @@ class AdminController extends Controller
         $fdate = strtotime($request->fdate) + 12600;
         $ldate = strtotime($request->ldate) + 12600;
 
-        if ($request->type == 'content')
+        if ($request->type == 'content') {
             $off_id = $request->off_id_content;
-        elseif ($request->type == 'category')
+        } elseif ($request->type == 'category') {
             $off_id = $request->off_id_category;
-        elseif ($request->type == 'all')
+        } elseif ($request->type == 'all') {
             $off_id = 0;
-        else
+        } else {
             $off_id = 0;
+        }
 
         $array = [
             'type' => $request->type,
@@ -2510,7 +2615,7 @@ class AdminController extends Controller
             'off' => $request->off,
             'first_date' => $fdate,
             'last_date' => $ldate,
-            'created_at' => time()
+            'created_at' => time(),
         ];
 
         $discount = DiscountContent::create($array);
@@ -2540,12 +2645,13 @@ class AdminController extends Controller
         $fdate = strtotime($request->fdate) + 12600;
         $ldate = strtotime($request->ldate) + 12600;
 
-        if ($request->type == 'content')
+        if ($request->type == 'content') {
             $off_id = $request->off_id_content;
-        elseif ($request->type == 'category')
+        } elseif ($request->type == 'category') {
             $off_id = $request->off_id_category;
-        else
+        } else {
             $off_id = '';
+        }
 
         $array = [
             'type' => $request->type,
@@ -2677,7 +2783,7 @@ class AdminController extends Controller
             'last_date' => $ldate,
             'mode' => $request->mode,
             'type' => $request->type,
-            'description' => $request->description
+            'description' => $request->description,
         ]);
         cache()->forget('vip.content');
         cache()->forget('slider.content.vip.home');
@@ -2704,7 +2810,7 @@ class AdminController extends Controller
             'last_date' => $ldate,
             'mode' => $request->mode,
             'type' => $request->type,
-            'description' => $request->description
+            'description' => $request->description,
         ]);
         cache()->forget('vip.content');
         cache()->forget('slider.content.vip.home');
@@ -2734,8 +2840,8 @@ class AdminController extends Controller
 
         $data = $request->all();
 
-        foreach ($data as $index=>$d){
-            if(is_array($d)){
+        foreach ($data as $index => $d) {
+            if (is_array($d)) {
                 $data[$index] = json_encode($d);
             }
         }
@@ -2747,10 +2853,12 @@ class AdminController extends Controller
         }
 
         Option::updateOrNew($data);
-        if ($lunch != null)
+        if ($lunch != null) {
             return Redirect::to(URL::previous() . '#' . $lunch);
-        else
+        } else {
             return back();
+        }
+
     }
 
     public function settingBlog()
@@ -2859,7 +2967,7 @@ class AdminController extends Controller
     {
         $data = [
             'lists' => ViewTemplate::all(),
-            'item' => []
+            'item' => [],
         ];
         return view('admin.setting.view_templates', $data);
     }
@@ -2868,7 +2976,7 @@ class AdminController extends Controller
     {
         $this->validate($request, [
             'folder' => 'required|unique:view_templates,folder',
-            'status' => 'required'
+            'status' => 'required',
         ]);
 
         $data = $request->all();
@@ -2877,14 +2985,14 @@ class AdminController extends Controller
             $status = true;
             ViewTemplate::where('status', true)
                 ->update([
-                    'status' => false
+                    'status' => false,
                 ]);
         }
 
         ViewTemplate::create([
             'folder' => $data['folder'],
             'status' => $status,
-            'created_at' => time()
+            'created_at' => time(),
         ]);
 
         cache()->forget('view.template');
@@ -2903,7 +3011,7 @@ class AdminController extends Controller
         ViewTemplate::where('status', true)
             ->where('id', '!=', $template->id)
             ->update([
-                'status' => false
+                'status' => false,
             ]);
 
         cache()->forget('view.template');
@@ -2921,7 +3029,6 @@ class AdminController extends Controller
 
         return redirect()->back();
     }
-
 
     ######################
     ### Convert Section ##
@@ -3032,15 +3139,16 @@ class AdminController extends Controller
             ->with('content')
             ->first();
 
-        if (!$part)
+        if (!$part) {
             abort(404);
-
+        }
 
         $storagePath = Storage::disk('local')->getDriver()->getAdapter()->getPathPrefix();
         $file = $storagePath . 'source/content-' . $part->content->id . '/video/part-' . $part->id . '.mp4';
 
-        if (!file_exists($file))
+        if (!file_exists($file)) {
             abort(404);
+        }
 
         $stream = new VideoStream($file);
         $stream->start();
@@ -3053,7 +3161,7 @@ class AdminController extends Controller
 
     public function QuizzesList()
     {
-        if(!function_exists('checkQuiz')){
+        if (!function_exists('checkQuiz')) {
             return view('admin.purchase');
         }
         $quizzes = Quiz::with(['content', 'questions', 'QuizResults'])->paginate(15);
@@ -3067,7 +3175,7 @@ class AdminController extends Controller
                     if ($result->status == 'pass') {
                         $passed_results += 1;
                     }
-                    $total_grade += (int)$result->user_grade;
+                    $total_grade += (int) $result->user_grade;
                 }
 
                 $quiz->passed = $passed_results;
@@ -3144,7 +3252,7 @@ class AdminController extends Controller
     // **********
     public function CertificatesList(Request $request)
     {
-        if(!function_exists('checkQuiz')){
+        if (!function_exists('checkQuiz')) {
             return view('admin.purchase');
         }
         $query = Certificate::query();
@@ -3175,14 +3283,14 @@ class AdminController extends Controller
         $certificates = $query->paginate(15);
 
         $data = [
-            'certificates' => $certificates
+            'certificates' => $certificates,
         ];
         return view('admin.certificates.list', $data);
     }
 
     public function CertificatesTemplatesList(Request $request)
     {
-        if(!function_exists('checkQuiz')){
+        if (!function_exists('checkQuiz')) {
             return view('admin.purchase');
         }
         $templates = CertificateTemplate::all();
@@ -3195,7 +3303,7 @@ class AdminController extends Controller
 
     public function CertificatesNewTemplate()
     {
-        if(!function_exists('checkQuiz')){
+        if (!function_exists('checkQuiz')) {
             return view('admin.purchase');
         }
         return view('admin.certificates.create_template');
@@ -3242,18 +3350,18 @@ class AdminController extends Controller
         $data = [
             'image' => $request->get('image'),
             'body' => $request->get('body'),
-            'position_x' => (int)$request->get('position_x', 120),
-            'position_y' => (int)$request->get('position_y', 100),
-            'font_size' => (int)$request->get('font_size', 26),
+            'position_x' => (int) $request->get('position_x', 120),
+            'position_y' => (int) $request->get('position_y', 100),
+            'font_size' => (int) $request->get('font_size', 26),
             'text_color' => $request->get('text_color', '#e1e1e1'),
         ];
         $body = str_replace('[user]', 'user name', $data['body']);
         $body = str_replace('[course]', 'course name', $body);
         $body = str_replace('[grade]', '55', $body);
 
-        $img = Image::make(getcwd().$data['image']);
+        $img = Image::make(getcwd() . $data['image']);
         $img->text($body, $data['position_x'], $data['position_y'], function ($font) use ($data) {
-            $font->file(getcwd().'/assets/admin/fonts/nunito-v9-latin-regular.ttf');
+            $font->file(getcwd() . '/assets/admin/fonts/nunito-v9-latin-regular.ttf');
             $font->size($data['font_size']);
             $font->color($data['text_color']);
         });
@@ -3265,7 +3373,7 @@ class AdminController extends Controller
         $template = CertificateTemplate::findOrFail($template_id);
 
         $data = [
-            'template' => $template
+            'template' => $template,
         ];
         return view('admin.certificates.create_template', $data);
     }
@@ -3276,25 +3384,28 @@ class AdminController extends Controller
         return response()->download($certificate->file);
     }
 
-
     ############
     ## Live ####
     ############
-    public function liveList(){
+    public function liveList()
+    {
         $list = MeetingDate::orderBy('id')->with('content');
-        return view('admin.live.list',['list'=>$list->paginate(20)]);
+        return view('admin.live.list', ['list' => $list->paginate(20)]);
     }
-    public function liveDetails($id){
+    public function liveDetails($id)
+    {
         $live = MeetingDate::find($id);
-        if(!$live)
+        if (!$live) {
             return abort(404);
+        }
 
         $Sells = Sell::where('content_id', $live->content_id)->pluck('user_id')->toArray();
-        $list = User::whereIn('id',$Sells);
+        $list = User::whereIn('id', $Sells);
 
-        return view('admin.live.details',['list'=>$list->paginate(20),'live'=>$live]);
+        return view('admin.live.details', ['list' => $list->paginate(20), 'live' => $live]);
     }
-    public function liveDelete($id){
+    public function liveDelete($id)
+    {
         MeetingDate::find($id)->delete();
         return back()->with('msg', trans('admin.result_delete_msg'));
     }

@@ -31,12 +31,12 @@
                     </a>
                 </li>
                 @endif
-                <li class="@yield('tab4')">
+                <!-- <li class="@yield('tab4')">
                     <a href="/user/video/off">
                         <span class="submicon mdi mdi-sale"></span>
                         {{ trans('main.discounts') }}
                     </a>
-                </li>
+                </li> -->
                 <li class="@yield('tab5')">
                     <a href="/user/video/promotion">
                         <span class="submicon mdi mdi-rocket"></span>

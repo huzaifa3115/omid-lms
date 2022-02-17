@@ -25,12 +25,12 @@
                         {{ trans('main.financial_documents') }}
                     </a>
                 </li>
-                <li class="@yield('tab4')">
+                <!-- <li class="@yield('tab4')">
                     <a href="/user/balance/charge">
                         <span class="submicon mdi mdi-credit-card-plus"></span>
                         {{ trans('main.charge_account') }}
                     </a>
-                </li>
+                </li> -->
                 <li class="@yield('tab5')">
                     <a href="/user/balance/report">
                         <span class="submicon mdi mdi-chart-areaspline"></span>

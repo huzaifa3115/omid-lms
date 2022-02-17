@@ -13,12 +13,12 @@
                         {{ trans('main.financial') }}
                     </a>
                 </li>
-                <li class="@yield('tab7')">
+                <!-- <li class="@yield('tab7')">
                     <a href="/user/balance/charge">
                         <span class="submicon mdi mdi-credit-card-plus"></span>
                         {{ trans('main.charge_account') }}
                     </a>
-                </li>
+                </li> -->
             </ul>
             <div class="tab-content">
                 <div class="active tab-pane fade in" id="tab1">

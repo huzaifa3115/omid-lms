@@ -1,0 +1,1 @@
+<?php echo $content; ?><?php /**PATH E:\xampp-php-7-3\htdocs\omid-lms\resources\views/email/content.blade.php ENDPATH**/ ?>
